@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:ignore="HardcodedText,Autofill,TextFields,ContentDescription">
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:padding="30dp"
+            android:background="@color/red"
+            android:elevation="4dp">
+
+            <!-- Toolbar Title (Centered) -->
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/store"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center"/>
+
+            <!-- Edit Button (Right-Aligned) -->
+            <TextView
+                android:id="@+id/toolbar_menu1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SAVE"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:layout_gravity="end"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="16dp"/>
+        </androidx.appcompat.widget.Toolbar>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Expenses Table (Main Content Area) -->
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:fillViewport="true">
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/expenses"
+                        android:background="@android:color/white">
+
+                        <TableRow>
+                            <TextView android:text="S.NO" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp"/>
+                            <TextView android:text="PARTICULARS" android:layout_weight="7" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="center"/>
+                            <TextView android:text="AMOUNT" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="end"/>
+                            <ImageView android:text="" android:layout_weight="1" android:padding="8dp" android:src="@drawable/plus" android:layout_marginTop="5dp"/>
+                        </TableRow>
+
+                        <!-- Sample Expense Rows -->
+                        <TableRow>
+                            <EditText android:hint="1" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:inputType="number"/>
+                            <EditText android:hint="Enter details" android:layout_weight="7" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="center" android:inputType="text"/>
+                            <EditText android:hint="0.00" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="end" android:inputType="numberDecimal"/>
+                            <ImageView android:src="@drawable/delete" android:layout_marginTop="10dp"/>
+                        </TableRow>
+
+                    </TableLayout>
+                </ScrollView>
+
+                <!-- Currency Denomination Dropdown -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/currency"
+                    android:padding="8dp">
+
+                    <!-- Dropdown Button -->
+                    <TextView
+                        android:id="@+id/currencyDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Currency Denomination ▼"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <!-- TableLayout (Initially Hidden) -->
+                    <TableLayout
+                        android:id="@+id/currencyTable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:background="@android:color/white"
+                        android:padding="8dp">
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="500"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="200"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="100"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="50"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="20"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="10"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="Coins"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="Extra Coins"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="Others"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:hint="Total Sales"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <EditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:inputType="number"/>
+                        </TableRow>
+
+
+
+                    </TableLayout>
+                </LinearLayout>
+
+                <!-- Financial Summary Dropdown -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- Dropdown Button -->
+                    <TextView
+                        android:id="@+id/financialSummaryDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Financial Summary ▼"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <!-- TableLayout (Initially Hidden) -->
+                    <TableLayout
+                        android:id="@+id/financialSummaryTable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:background="@android:color/white"
+                        android:padding="8dp">
+
+                        <TableRow><TextView android:hint="Opening Cash in Hand" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Total Sales" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Received from Owner" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Credit Received" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Expenses" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="UPI Payments" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Credit Sales" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="Amount in Hand" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+                        <TableRow><TextView android:hint="End Cash" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <EditText android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp" android:inputType="number"/></TableRow>
+
+                    </TableLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+
+
+    </LinearLayout>
+
+
+
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@android:color/white"
+        app:itemTextColor="@color/black"
+        app:menu="@menu/drawer_menu"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>
+
+
