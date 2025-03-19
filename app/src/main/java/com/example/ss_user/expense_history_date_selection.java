@@ -83,7 +83,7 @@ public class expense_history_date_selection extends AppCompatActivity implements
             tvSelectedDate.setText("Selected Date: " + formattedDate);
 
             // Show Popup only if the user is from "store"
-            if ("store".equals(userSource)) {
+            if (!"store".equals(userSource)) {
                 showPopup(anchorView);
             }
             else {

@@ -1,0 +1,255 @@
+    //TextView currencyDropdown = findViewById(R.id.currencyDropdown);
+       // final TableLayout currencyTable = findViewById(R.id.currencyTable);
+
+       /* currencyDropdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currencyTable.getVisibility() == View.GONE) {
+                    currencyTable.setVisibility(View.VISIBLE);
+                    currencyDropdown.setText("Currency Denomination ▲");
+                } else {
+                    currencyTable.setVisibility(View.GONE);
+                    currencyDropdown.setText("Currency Denomination ▼");
+                }
+            }
+        });
+
+        TextView financialSummaryDropdown = findViewById(R.id.financialSummaryDropdown);
+        final TableLayout financialSummaryTable = findViewById(R.id.financialSummaryTable);
+
+        financialSummaryDropdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (financialSummaryTable.getVisibility() == View.GONE) {
+                    financialSummaryTable.setVisibility(View.VISIBLE);
+                    financialSummaryDropdown.setText("Financial Summary ▲");
+                } else {
+                    financialSummaryTable.setVisibility(View.GONE);
+                    financialSummaryDropdown.setText("Financial Summary ▼");
+                }
+            }
+        });*/
+
+
+
+
+
+         <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="500"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="200"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="100"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="50"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="20"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="10"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="Coins"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="Extra Coins"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="Others"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:hint="Total Sales"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textColorHint="@color/black"
+                                        android:textSize="18sp" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:hint="Value"
+                                        android:padding="12dp"
+                                        android:textColor="@color/black"
+                                        android:textSize="20sp" />
+                                </TableRow>

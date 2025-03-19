@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private EditText usernameEditText, passwordEditText;
-    private TextView loginButton,ForgetPass,RegisterHere;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
         // Initialize UI components
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
-        loginButton = findViewById(R.id.logbtn);
-        ForgetPass = findViewById(R.id.forget_pass);
+        TextView loginButton = findViewById(R.id.logbtn);
+        TextView forgetPass = findViewById(R.id.forget_pass);
 
 
         // Set onClickListener for login button
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // Navigate to Forget Password Page
-        ForgetPass.setOnClickListener(v -> {
+        forgetPass.setOnClickListener(v -> {
 
             Intent intent = new Intent(MainActivity.this, Forget__Pass.class);
             startActivity(intent);
