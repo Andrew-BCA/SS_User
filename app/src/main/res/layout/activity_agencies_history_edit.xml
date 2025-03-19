@@ -66,18 +66,20 @@
                     android:id="@+id/expenses"
                     android:background="@android:color/white">
 
+
+
+                    <!-- Sample Expense Rows
                     <TableRow>
                         <TextView android:text="S.NO" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="18sp"/>
                         <TextView android:text="PARTICULARS" android:layout_weight="7" android:padding="8dp" android:textColor="@color/black" android:textSize="18sp" android:gravity="center"/>
                         <TextView android:text="AMOUNT" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="18sp" android:gravity="end"/>
                     </TableRow>
-
-                    <!-- Sample Expense Rows -->
                     <TableRow>
                         <TextView android:hint="1" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp"/>
                         <TextView android:hint="Enter details" android:layout_weight="7" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="center"/>
                         <TextView android:hint="0.00" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="end"/>
                     </TableRow>
+                    -->
 
 
                 </TableLayout>

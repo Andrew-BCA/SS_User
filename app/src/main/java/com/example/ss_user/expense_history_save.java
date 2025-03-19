@@ -174,7 +174,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         EditText serialNo = new EditText(this);
         serialNo.setText(String.valueOf(serial));  // Set incremented serial number
         serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         serialNo.setPadding(8, 8, 8, 8);
         serialNo.setTextColor(ContextCompat.getColor(this, R.color.black));
         serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -183,7 +183,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         EditText particulars = new EditText(this);
         particulars.setHint("Enter details");
         particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         particulars.setPadding(8, 8, 8, 8);
         particulars.setTextColor(ContextCompat.getColor(this, R.color.black));
         particulars.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -194,7 +194,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         EditText amountField = new EditText(this);
         amountField.setHint("0.00");
         amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         amountField.setPadding(8, 8, 8, 8);
         amountField.setTextColor(ContextCompat.getColor(this, R.color.black));
         amountField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);

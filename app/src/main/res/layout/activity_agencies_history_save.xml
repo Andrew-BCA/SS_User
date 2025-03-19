@@ -68,21 +68,22 @@
                         android:id="@+id/expenses"
                         android:background="@android:color/white">
 
+
+
+                        <!-- Sample Expense Rows
                         <TableRow>
                             <TextView android:text="S.NO" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp"/>
                             <TextView android:text="PARTICULARS" android:layout_weight="7" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="center"/>
                             <TextView android:text="AMOUNT" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="end"/>
                             <ImageView android:text="" android:layout_weight="1" android:padding="8dp" android:src="@drawable/plus" android:layout_marginTop="5dp"/>
                         </TableRow>
-
-                        <!-- Sample Expense Rows -->
                         <TableRow>
                             <EditText android:hint="1" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:inputType="number"/>
                             <EditText android:hint="Enter details" android:layout_weight="7" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="center" android:inputType="text"/>
                             <EditText android:hint="0.00" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="end" android:inputType="numberDecimal"/>
                             <ImageView android:src="@drawable/delete" android:layout_marginTop="10dp"/>
                         </TableRow>
-
+                        -->
                     </TableLayout>
                 </ScrollView>
             </LinearLayout>
