@@ -60,7 +60,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         loadExpensesFromDatabase();
 
         // Add the header row
-        addHeaderRow();
+      //  addHeaderRow();
 
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -163,26 +163,26 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
 
     private void addExpenseRow(int serial, String details, int amount) {
-        if(serial == 1){
+        if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
         }
 
         // Create a new TableRow programmatically
         TableRow newRow = new TableRow(this);
 
-        TextView serialNo = new EditText(this);
+        TextView serialNo = new TextView(this);
         serialNo.setText(String.valueOf(serial));  // Set incremented serial number
         serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         serialNo.setPadding(8, 8, 8, 8);
         serialNo.setTextColor(ContextCompat.getColor(this, R.color.black));
         serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
         serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
 
-        TextView particulars = new EditText(this);
+        TextView particulars = new TextView(this);
         particulars.setHint("Enter details");
         particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         particulars.setPadding(8, 8, 8, 8);
         particulars.setTextColor(ContextCompat.getColor(this, R.color.black));
         particulars.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -190,10 +190,10 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         particulars.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
         particulars.setText(details); // Set details
 
-        TextView amountField = new EditText(this);
+        TextView amountField = new TextView(this);
         amountField.setHint("0.00");
         amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
-        amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         amountField.setPadding(8, 8, 8, 8);
         amountField.setTextColor(ContextCompat.getColor(this, R.color.black));
         amountField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);

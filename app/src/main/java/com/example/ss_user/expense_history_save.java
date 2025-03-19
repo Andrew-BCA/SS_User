@@ -44,7 +44,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
     private TableLayout expensesTable, currencyTable, financialSummaryTable;
     private TextView currencyDropdown, financialSummaryDropdown;
     private DatabaseReference databaseRef;
-    private int serialCounter = 1; // Global counter for serial numbers
+    private int serialCounter = 0; // Global counter for serial numbers
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         loadExpensesFromDatabase();
 
         // Add the header row
-        addHeaderRow();
+        //addHeaderRow();
     }
 
     private void initializeUIComponents() {
@@ -153,16 +153,22 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
     }
 
     private void addExpenseRow() {
-        // Call the overloaded method with default values for a new row
-        addExpenseRow(serialCounter++, "", 0);
+        // If only the header row exists, reset counter
+        if (expensesTable.getChildCount() == 1) {
+            serialCounter = 0;
+        }
+        addExpenseRow(++serialCounter, "", 0);
     }
 
-    private void addExpenseRow(int serial, String details, int amount) {
-        if(serial == 1){
-            addHeaderRow();
-        }
 
-        // Create a new TableRow programmatically
+    private void addExpenseRow(int serial, String details, int amount) {
+
+            if (expensesTable.getChildCount() == 0) { // Ensure header exists
+                addHeaderRow();
+            }
+
+
+            // Create a new TableRow programmatically
         TableRow newRow = new TableRow(this);
 
         EditText serialNo = new EditText(this);
@@ -229,11 +235,18 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         });
 
         // DELETE FUNCTIONALITY
+        // DELETE FUNCTIONALITY
         deleteButton.setOnClickListener(v -> {
             expensesTable.removeView(newRow); // Remove row from UI
             newExpenseRef.removeValue(); // Remove from Firebase
             updateSerialNumbers(); // Update serial numbers dynamically
+
+            // If all rows (except header) are deleted, reset counter
+            if (expensesTable.getChildCount() == 1) { // Only header exists
+                serialCounter = 0;
+            }
         });
+
 
         newRow.addView(serialNo);
         newRow.addView(particulars);
@@ -246,20 +259,24 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
     private void updateSerialNumbers() {
         TableLayout tableLayout = findViewById(R.id.expenses);
         int count = tableLayout.getChildCount();
-        serialCounter = 1; // Reset counter
 
-        // Start from 1 to skip the header row
-        for (int i = 1; i < count; i++) {
+        if (count <= 1) return; // If only the header exists, no update needed
+
+        int newSerial = 1; // Start numbering from 1
+        for (int i = 1; i < count; i++) { // Skip header row
             View row = tableLayout.getChildAt(i);
             if (row instanceof TableRow) {
-                // Ensure that the first child is an EditText
-                EditText serialNo = (EditText) ((TableRow) row).getChildAt(0);
-                if (serialNo != null) {
-                    serialNo.setText(String.valueOf(serialCounter++));
+                View firstChild = ((TableRow) row).getChildAt(0);
+                if (firstChild instanceof EditText) { // Ensure it's an EditText before casting
+                    ((EditText) firstChild).setText(String.valueOf(newSerial++));
                 }
             }
         }
     }
+
+
+
+
     private void saveExpensesToDatabase() {
         DatabaseReference expenseRef = databaseRef.child("ExpenseDetails");
 
@@ -362,6 +379,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
                         // Add a new row with the retrieved data
                         addExpenseRow(serial, details, amount);
+
                     }
                 }
 
