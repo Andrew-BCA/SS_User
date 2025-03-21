@@ -1,6 +1,8 @@
 package com.example.ss_user;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -46,7 +48,15 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_agencies_history_edit);
-        databaseRef = FirebaseDatabase.getInstance().getReference("Agencies");
+        // Retrieve SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Guest");
+        String userType = sharedPreferences.getString("userType", "Standard");
+
+        // Use the retrieved data
+        Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
+
+        databaseRef = FirebaseDatabase.getInstance().getReference(userType).child("Agencies");
 
         // Initialize UI components
         initializeUIComponents();
