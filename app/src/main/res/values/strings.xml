@@ -43,6 +43,8 @@ Enter Name
     <string name="delete">Delete</string>
     <string name="expenses">Expenses</string>
     <string name="agencies">Agencies</string>
+    <string name="add_row">Add Row</string>
+    <string name="save">Save</string>
 
 
 </resources>

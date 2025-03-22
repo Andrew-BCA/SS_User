@@ -21,9 +21,9 @@
             android:layout_height="100dp"
             android:padding="30dp"
             android:background="@color/red"
-            android:elevation="4dp">
-
-            <!-- Toolbar Title (Centered) -->
+            android:elevation="4dp"
+            app:popupTheme="@style/CustomPopupMenu"
+            app:menu="@menu/main_menu">
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
@@ -32,20 +32,10 @@
                 android:textSize="25sp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"/>
+            <!-- Remove the TextView-based SAVE button, the menu will handle it -->
 
-            <!-- Edit Button (Right-Aligned) -->
-            <TextView
-                android:id="@+id/toolbar_menu1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SAVE"
-                android:textSize="25sp"
-                android:textColor="@android:color/white"
-                android:layout_gravity="end"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="16dp"/>
+
         </androidx.appcompat.widget.Toolbar>
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

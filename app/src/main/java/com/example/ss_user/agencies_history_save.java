@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -74,7 +76,8 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         //addHeaderRow();
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
-        edit = findViewById(R.id.toolbar_menu1);
+        setSupportActionBar(toolbar); // Make sure this is called!
+        edit = findViewById(R.id.toolbar_title);
 
         edit.setOnClickListener(v -> {
             Intent i = new Intent(agencies_history_save.this, agencies_history_edit.class);
@@ -105,7 +108,11 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         expensesTable = findViewById(R.id.expenses);
 
         // Save Expenses
-        saveButton.setOnClickListener(v -> saveExpensesToDatabase());
+        if (saveButton != null) {
+            saveButton.setOnClickListener(v -> saveExpensesToDatabase());
+        } else {
+            Log.e("ERROR", "toolbar_menu1 not found! Check XML.");
+        }
 
         // Initialize Navigation Drawer Toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -379,6 +386,28 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_save) {
+            // Handle Save button click
+            saveExpensesToDatabase();
+            return true;
+        } else if (id == R.id.action_add_row) {
+            // Handle Add Row button click
+            addExpenseRow();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
