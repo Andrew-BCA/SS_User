@@ -1,6 +1,7 @@
 package com.example.ss_user;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -66,6 +67,7 @@ public class expense_history_date_selection extends AppCompatActivity implements
     }
 
     private void showMaterialDatePicker(View anchorView) {
+
         // Build Material Date Picker
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Select Date")
@@ -76,26 +78,38 @@ public class expense_history_date_selection extends AppCompatActivity implements
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
             // Convert selected date to formatted String
-            SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             String formattedDate = sdf.format(new Date(selection));
+
+            // Save selected date in SharedPreferences
+            saveSelectedDate(formattedDate);
 
             // Set the selected date in TextView
             tvSelectedDate.setText("Selected Date: " + formattedDate);
 
-            // Show Popup only if the user is from "store"
+            // Show Popup only if the user is NOT from "store"
             if (!"store".equals(userSource)) {
                 showPopup(anchorView);
-            }
-            else {
+            } else {
                 Intent i = new Intent(expense_history_date_selection.this, expense_history_edit.class);
                 startActivity(i);
             }
         });
     }
 
+    // Method to Save Date in SharedPreferences
+    private void saveSelectedDate(String date) {
+        SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferencess.edit();
+        editor.putString("selected_date", date);
+        editor.apply();
+    }
     private void showPopup(View anchorView) {
         // Inflate the popup layout
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_expenses_or_agencies, null);
+
+        TextView tvPopupMessage = popupView.findViewById(R.id.tvPopupMessage);
+
 
         // Get screen width dynamically
         int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.85); // 85% of screen width
@@ -115,14 +129,14 @@ public class expense_history_date_selection extends AppCompatActivity implements
         btnEdit.setOnClickListener(v -> {
             popupWindow.dismiss();
             Toast.makeText(this, "Expenses Clicked", Toast.LENGTH_SHORT).show();
-            Intent i = new Intent(expense_history_date_selection.this, expense_history_edit.class);
+            Intent i = new Intent(expense_history_date_selection.this, expense_history_for_selected_date.class);
             startActivity(i);
         });
 
         btnDelete.setOnClickListener(v -> {
             popupWindow.dismiss();
             Toast.makeText(this, "Agencies Clicked", Toast.LENGTH_SHORT).show();
-            Intent i = new Intent(expense_history_date_selection.this, agencies_history_edit.class);
+            Intent i = new Intent(expense_history_date_selection.this, agencies_history_for_selected_date.class);
             startActivity(i);
         });
     }

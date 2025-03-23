@@ -24,6 +24,8 @@
             android:elevation="4dp"
             app:popupTheme="@style/CustomPopupMenu"
             app:menu="@menu/main_menu">
+            <!-- Navigation Drawer -->
+
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
@@ -32,9 +34,8 @@
                 android:textSize="25sp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"/>
+
             <!-- Remove the TextView-based SAVE button, the menu will handle it -->
-
-
         </androidx.appcompat.widget.Toolbar>
         <ScrollView
             android:layout_width="match_parent"
@@ -399,15 +400,7 @@
 
             </LinearLayout>
         </ScrollView>
-
-
-
     </LinearLayout>
-
-
-
-
-    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -416,7 +409,6 @@
         android:background="@android:color/white"
         app:itemTextColor="@color/black"
         app:menu="@menu/drawer_menu"/>
-
 </androidx.drawerlayout.widget.DrawerLayout>
 
 

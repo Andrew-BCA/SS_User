@@ -60,7 +60,7 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         String userType = sharedPreferences.getString("userType", "Standard");
 
         // Use the retrieved data
-        Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
 
 
         // Initialize Firebase Database
@@ -373,7 +373,6 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
             Intent i = new Intent(agencies_history_save.this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(agencies_history_save.this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_manage_user) {

@@ -61,7 +61,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         String userType = sharedPreferences.getString("userType", "Standard");
 
         // Use the retrieved data
-        Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
+      //  Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
 
 
         // Initialize Firebase Database
@@ -78,11 +78,23 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         // Add the header row
         //addHeaderRow();
+        // Initialize DrawerLayout
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Create Hamburger Menu Toggle
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
     }
 
     private void initializeUIComponents() {
         // Initialize Toolbar & Save Button
         Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         saveButton = findViewById(R.id.toolbar_menu1);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -92,6 +104,8 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         financialSummaryTable = findViewById(R.id.financialSummaryTable);
         currencyDropdown = findViewById(R.id.currencyDropdown);
         financialSummaryDropdown = findViewById(R.id.financialSummaryDropdown);
+
+
 
 
         // Toggle Dropdowns
@@ -111,7 +125,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
     }
-
     private void addHeaderRow() {
         // Create a new TableRow
         TableRow tableRow = new TableRow(this);
@@ -161,7 +174,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         // Finally, add the TableRow to your TableLayout
         expensesTable.addView(tableRow);
     }
-
     private void toggleVisibility(TableLayout table, TextView dropdown, String label) {
         if (table.getVisibility() == View.GONE) {
             table.setVisibility(View.VISIBLE);
@@ -171,7 +183,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             dropdown.setText(label + " ▼");
         }
     }
-
     private void addExpenseRow() {
         // If only the header row exists, reset counter
         if (expensesTable.getChildCount() == 1) {
@@ -179,8 +190,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         }
         addExpenseRow(++serialCounter, "", 0);
     }
-
-
     private void addExpenseRow(int serial, String details, int amount) {
 
             if (expensesTable.getChildCount() == 0) { // Ensure header exists
@@ -275,7 +284,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         expensesTable.addView(newRow);
     }
-
     private void updateSerialNumbers() {
         TableLayout tableLayout = findViewById(R.id.expenses);
         int count = tableLayout.getChildCount();
@@ -293,10 +301,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             }
         }
     }
-
-
-
-
     private void saveExpensesToDatabase() {
         DatabaseReference expenseRef = databaseRef.child("ExpenseDetails");
 
@@ -339,7 +343,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         Toast.makeText(this, "Expenses saved successfully!", Toast.LENGTH_SHORT).show();
     }
-
     private void saveCurrencyData() {
         DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination");
 
@@ -359,7 +362,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         currencyRef.child(todayDate).setValue(currencyData);
     }
-
     private void saveFinancialSummaryData() {
         DatabaseReference summaryRef = databaseRef.child("FinancialSummary");
 
@@ -378,7 +380,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         summaryRef.child(todayDate).setValue(summaryData);
     }
-
     private void loadExpensesFromDatabase() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         DatabaseReference expenseRef = databaseRef.child("ExpenseDetails").child(todayDate);
@@ -416,7 +417,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             }
         });
     }
-
     private void loadFinancialSummaryData() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
@@ -445,7 +445,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             }
         });
     }
-
     private void loadCurrencyData() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination").child(todayDate);
@@ -474,7 +473,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             }
         });
     }
-
     private void setTextValue(int id, String value) {
         EditText editText = findViewById(id);
         if (value != null) {
@@ -507,7 +505,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
