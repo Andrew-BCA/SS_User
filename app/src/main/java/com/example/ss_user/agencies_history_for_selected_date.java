@@ -255,20 +255,32 @@ public class agencies_history_for_selected_date extends AppCompatActivity implem
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            Intent i = new Intent(agencies_history_for_selected_date.this, expense_history_edit.class);
+            Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            Intent i = new Intent(agencies_history_for_selected_date.this, expense_history_date_selection.class);
+            Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_manage_user) {
-            Intent i = new Intent(agencies_history_for_selected_date.this, agencies_history_edit.class);
+            Intent i = new Intent(this, agencies_history_edit.class);
             startActivity(i);
+        }else if (id == R.id.nav_log_out) {
+             logoutUser();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear session
+        editor.apply();
 
+        // Redirect to Login Screen
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {

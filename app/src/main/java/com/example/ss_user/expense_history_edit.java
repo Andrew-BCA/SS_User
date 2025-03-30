@@ -358,28 +358,37 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
 
 
-  @Override
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-      if (id == R.id.nav_home) {
-          Intent i = new Intent(expense_history_edit.this, expense_history_edit.class);
-          startActivity(i);
-      } else if (id == R.id.nav_create_user) {
-        //  Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
-          Intent i = new Intent(expense_history_edit.this, expense_history_date_selection.class);
-          startActivity(i);
-      }else if (id == R.id.nav_manage_user) {
-          // Handle Manage User navigation (e.g., start a new activity or fragment)
-          // Example:
-          Intent i = new Intent(expense_history_edit.this, agencies_history_edit.class);
-          startActivity(i);
-      }
-      // Close drawer after selection
+        if (id == R.id.nav_home) {
+            Intent i = new Intent(this, expense_history_edit.class);
+            startActivity(i);
+        } else if (id == R.id.nav_create_user) {
+            Intent i = new Intent(this, expense_history_date_selection.class);
+            startActivity(i);
+        }else if (id == R.id.nav_manage_user) {
+            Intent i = new Intent(this, agencies_history_edit.class);
+            startActivity(i);
+        }else if (id == R.id.nav_log_out) {
+            logoutUser();
+        }
+
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear session
+        editor.apply();
 
+        // Redirect to Login Screen
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {

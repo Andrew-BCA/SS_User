@@ -73,11 +73,6 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
             startActivity(i);
         });
 
-
-
-
-
-
         // Initialize DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -143,6 +138,18 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
         // Finally, add the TableRow to your TableLayout
         expensesTable.addView(tableRow);
     }
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear session
+        editor.apply();
+
+        // Redirect to Login Screen
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
     private void addExpenseRow(int serial, String details, int amount) {
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
@@ -264,6 +271,11 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
             // Example:
             Intent i = new Intent(agencies_history_edit.this, agencies_history_edit.class);
             startActivity(i);
+        }else if (id == R.id.nav_log_out) {
+            // Handle Manage User navigation (e.g., start a new activity or fragment)
+            // Example:
+
+            logoutUser();
         }
 
         // Close drawer after selection

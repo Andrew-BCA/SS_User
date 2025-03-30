@@ -51,7 +51,8 @@
                 <ScrollView
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
-                    android:fillViewport="true">
+                    android:fillViewport="true"
+                    tools:ignore="NestedScrolling">
 
                     <TableLayout
                         android:layout_width="match_parent"
@@ -356,13 +357,14 @@
                 </LinearLayout>
 
                 <!-- Financial Summary Dropdown -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <!-- Dropdown Button -->
+                                      <!-- Dropdown Button -->
                     <TextView
                         android:id="@+id/financialSummaryDropdown"
                         android:layout_width="match_parent"

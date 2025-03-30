@@ -95,6 +95,10 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         // Initialize Toolbar & Save Button
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // Remove the title from the toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false); // Removes title from support action bar
+        toolbar.setTitle(""); // Removes title from the toolbar
+        toolbar.setSubtitle(""); // Removes any subtitle
         saveButton = findViewById(R.id.toolbar_menu1);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -491,14 +495,31 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            startActivity(new Intent(this, expense_history_edit.class));
+            Intent i = new Intent(this, expense_history_edit.class);
+            startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            startActivity(new Intent(this, expense_history_date_selection.class));
-        } else if (id == R.id.nav_manage_user) {
-            startActivity(new Intent(this, agencies_history_edit.class));
+            Intent i = new Intent(this, expense_history_date_selection.class);
+            startActivity(i);
+        }else if (id == R.id.nav_manage_user) {
+            Intent i = new Intent(this, agencies_history_edit.class);
+            startActivity(i);
+        }else if (id == R.id.nav_log_out) {
+            logoutUser();
         }
+
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear session
+        editor.apply();
+
+        // Redirect to Login Screen
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

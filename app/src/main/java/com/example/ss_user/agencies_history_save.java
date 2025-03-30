@@ -77,6 +77,10 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar); // Make sure this is called!
+        // Remove the title from the toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false); // Removes title from support action bar
+        toolbar.setTitle(""); // Removes title from the toolbar
+        toolbar.setSubtitle(""); // Removes any subtitle
         edit = findViewById(R.id.toolbar_title);
 
         edit.setOnClickListener(v -> {
@@ -172,13 +176,13 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
     private void addExpenseRow() {
         // If only the header row exists, reset counter
         if (expensesTable.getChildCount() == 1) {
-            serialCounter = 0;
+            serialCounter = 1;
         }
         addExpenseRow(++serialCounter, "", 0);
     }
 
 
-    private void addExpenseRow(int serial, String details, int amount) {
+    private void addExpenseRow(int serial, String details, int amount){
 
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
@@ -294,6 +298,8 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         DatabaseReference expenseRef = databaseRef.child("ExpenseDetails");
 
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+       // DatabaseReference expensesRef = databaseRef.child("ExpenseDetails").child(todayDate);
+
 
         int rowCount = expensesTable.getChildCount();
         if (rowCount <= 0) {
@@ -302,6 +308,7 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         }
 
         for (int i = 1; i < rowCount; i++) {
+            int totalAmount = 0;
             TableRow row = (TableRow) expensesTable.getChildAt(i);
 
             EditText serialNo = (EditText) row.getChildAt(0);
@@ -313,6 +320,8 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
                 int price = Integer.parseInt(amount.getText().toString().trim());
                 String details = particulars.getText().toString().trim();
 
+               // totalAmount += price; // Add amount to total
+
                 if (!details.isEmpty()) {
                     Map<String, Object> expenseData = new HashMap<>();
                     expenseData.put("serial", serial);
@@ -321,6 +330,8 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
 
                     // Store under "expenses -> serialNo -> data"
                     expenseRef.child(todayDate).child(String.valueOf(serial)).setValue(expenseData);
+                    //expensesRef.child("TotalAmount").setValue(totalAmount);
+
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();
@@ -364,27 +375,36 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         });
     }
 
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            Intent i = new Intent(agencies_history_save.this, expense_history_edit.class);
+            Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            Intent i = new Intent(agencies_history_save.this, expense_history_date_selection.class);
+            Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_manage_user) {
-            // Handle Manage User navigation (e.g., start a new activity or fragment)
-            // Example:
-            Intent i = new Intent(agencies_history_save.this, agencies_history_edit.class);
+            Intent i = new Intent(this, agencies_history_edit.class);
             startActivity(i);
+        }else if (id == R.id.nav_log_out) {
+            logoutUser();
         }
 
-        // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear session
+        editor.apply();
+
+        // Redirect to Login Screen
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

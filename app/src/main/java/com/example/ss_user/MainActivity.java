@@ -37,6 +37,15 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+
+        // Check if user is already logged in
+        if (sharedPreferences.contains("username")) {
+            // Redirect to expense_history_edit if session exists
+            startActivity(new Intent(MainActivity.this, expense_history_edit.class));
+            finish();
+        }
+
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
         TextView loginButton = findViewById(R.id.logbtn);
