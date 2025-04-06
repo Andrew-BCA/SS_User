@@ -141,7 +141,7 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
     private void logoutUser() {
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear(); // Clear session
+        editor.clear();
         editor.apply();
 
         // Redirect to Login Screen

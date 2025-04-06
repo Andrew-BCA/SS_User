@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+
             @Override
             public void onCancelled(DatabaseError error) {
                 Toast.makeText(MainActivity.this, "Database Error!", Toast.LENGTH_SHORT).show();
