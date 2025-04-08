@@ -3,6 +3,7 @@ package com.example.ss_user;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -230,6 +231,7 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 expensesTable.removeAllViews(); // Clear existing rows
+                int totalAmount = 0;
 
                 if (!dataSnapshot.exists()) {
                     // If no data exists, add an empty row
@@ -243,8 +245,11 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
 
                         // Add a new row with the retrieved data
                         addExpenseRow(serial, details, amount);
+                        totalAmount += amount;
+
                     }
                 }
+                addTotalAgencies(totalAmount);
 
                 // Load financial summary data
             }
@@ -255,6 +260,38 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
             }
         });
     }
+    private void addTotalAgencies(int totalAmount) {
+        TableRow totalRow = new TableRow(this);
+
+        TextView label = new TextView(this);
+        label.setText("Total");
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        label.setTextColor(ContextCompat.getColor(this, R.color.black));
+        label.setTypeface(null, Typeface.BOLD);
+        label.setPadding(8, 8, 8, 8);
+        label.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 12));
+        label.setGravity(Gravity.END);
+
+        TextView totalText = new TextView(this);
+        totalText.setText("₹" + totalAmount);
+        totalText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        totalText.setTextColor(ContextCompat.getColor(this, R.color.black));
+        totalText.setTypeface(null, Typeface.BOLD);
+        totalText.setPadding(8, 8, 8, 8);
+        totalText.setGravity(Gravity.END);
+        totalText.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        // Empty cell to match S.NO column space
+        TextView emptyCell = new TextView(this);
+        emptyCell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        totalRow.addView(emptyCell);   // for S.NO column
+        totalRow.addView(label);       // for PARTICULARS column
+        totalRow.addView(totalText);   // for AMOUNT column
+
+        expensesTable.addView(totalRow);
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();

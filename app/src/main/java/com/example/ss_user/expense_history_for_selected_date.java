@@ -3,6 +3,7 @@ package com.example.ss_user;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -251,6 +252,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 expensesTable.removeAllViews(); // Clear existing rows
+                int totalAmount = 0;
 
                 if (!dataSnapshot.exists()) {
                     // If no data exists, add an empty row
@@ -264,11 +266,14 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
                         // Add a new row with the retrieved data
                         addExpenseRow(serial, details, amount);
+                        totalAmount += amount;
                     }
                 }
 
                 // Load financial summary data
                 loadFinancialSummaryData();
+
+                addTotalRow(totalAmount);
 
                 // Load currency data
                 loadCurrencyData();
@@ -280,7 +285,37 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             }
         });
     }
+    private void addTotalRow(int totalAmount) {
+        TableRow totalRow = new TableRow(this);
 
+        TextView label = new TextView(this);
+        label.setText("Total");
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        label.setTextColor(ContextCompat.getColor(this, R.color.black));
+        label.setTypeface(null, Typeface.BOLD);
+        label.setPadding(8, 8, 8, 8);
+        label.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 12));
+        label.setGravity(Gravity.END);
+
+        TextView totalText = new TextView(this);
+        totalText.setText("₹" + totalAmount);
+        totalText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        totalText.setTextColor(ContextCompat.getColor(this, R.color.black));
+        totalText.setTypeface(null, Typeface.BOLD);
+        totalText.setPadding(8, 8, 8, 8);
+        totalText.setGravity(Gravity.END);
+        totalText.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        // Empty cell to match S.NO column space
+        TextView emptyCell = new TextView(this);
+        emptyCell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        totalRow.addView(emptyCell);   // for S.NO column
+        totalRow.addView(label);       // for PARTICULARS column
+        totalRow.addView(totalText);   // for AMOUNT column
+
+        expensesTable.addView(totalRow);
+    }
     private void loadFinancialSummaryData() {
         SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
@@ -309,7 +344,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             }
         });
     }
-
     private void loadCurrencyData() {
         SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
@@ -351,9 +385,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         EditText editText = findViewById(id);
         return editText.getText().toString().trim();
     }
-
-
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -385,7 +416,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
-
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
