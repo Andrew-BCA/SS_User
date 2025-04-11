@@ -12,9 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SS_User"
         tools:targetApi="31">
-        <activity
-            android:name=".agencies_history_for_selected_date"
-            android:exported="false" />
+
         <activity
             android:name=".expense_history_for_selected_date"
             android:exported="false" />
@@ -28,12 +26,6 @@
             android:name=".expense_history_save"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"/>
-        <activity
-            android:name=".agencies_history_save"
-            android:exported="false" />
-        <activity
-            android:name=".agencies_history_edit"
-            android:exported="false" />
         <activity
             android:name=".expense_history_date_selection"
             android:exported="false" />

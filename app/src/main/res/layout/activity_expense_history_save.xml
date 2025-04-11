@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:fitsSystemWindows="true"
     tools:ignore="HardcodedText,Autofill,TextFields,ContentDescription">
 
     <!-- Main Content Area -->
@@ -18,8 +19,7 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:padding="30dp"
+            android:layout_height="56dp"
             android:background="@color/red"
             android:elevation="4dp"
             app:popupTheme="@style/CustomPopupMenu"

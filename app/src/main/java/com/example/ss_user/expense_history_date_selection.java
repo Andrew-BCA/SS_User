@@ -31,7 +31,7 @@ import java.util.Locale;
 public class expense_history_date_selection extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private TextView tvSelectedDate;
+    private TextView tvSelectedDate,toolbar_title;
     private Button btnSelectDate;
     private String userSource;
 
@@ -41,8 +41,17 @@ public class expense_history_date_selection extends AppCompatActivity implements
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_expense_history_date_selection);
 
+
+        // Retrieve SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Guest");
+        String userType = sharedPreferences.getString("userType", "Standard");
         // Retrieve user source from intent
         userSource = getIntent().getStringExtra("user_source");
+
+        toolbar_title = findViewById(R.id.toolbar_title);
+
+        toolbar_title.setText(userType);
 
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);

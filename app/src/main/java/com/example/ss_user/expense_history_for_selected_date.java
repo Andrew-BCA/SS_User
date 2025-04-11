@@ -47,7 +47,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
     private DrawerLayout drawerLayout;
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
-    private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
+    private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView,toolbar_title;
     private DatabaseReference databaseRef;
 
     @Override
@@ -66,6 +66,11 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
 
         databaseRef = FirebaseDatabase.getInstance().getReference(userType);
+        toolbar_title = findViewById(R.id.toolbar_title);
+        totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
+        totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
+
+        toolbar_title.setText(userType);
 
         // Initialize UI components
         initializeUIComponents();
@@ -135,13 +140,8 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
                 }
             }
         });
-
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
-
-
-
-
 
         // Initialize DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -265,7 +265,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         // Finally, add the TableRow to your agenciesTable
         agenciesTable.addView(agenciesHeaderRow);
     }
-
     private void toggleVisibility(TableLayout table, TextView dropdown, String label) {
         if (table.getVisibility() == View.GONE) {
             table.setVisibility(View.VISIBLE);
@@ -378,6 +377,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
                 loadFinancialSummaryData();
 
                 addTotalRow(totalAmount);
+                totalExpenseTextView.setText("Total Expense: ₹" + totalAmount);
 
                 // Load currency data
                 loadCurrencyData();
@@ -469,6 +469,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
                         totalAmount += amount;
                     }
                     addTotalAgencies(totalAmount);
+                    totalAgencyExpenseTextView.setText("Total Agency Expense: ₹" + totalAmount);
                 }
             }
 
