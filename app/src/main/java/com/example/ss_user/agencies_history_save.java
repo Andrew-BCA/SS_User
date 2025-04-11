@@ -180,8 +180,6 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         }
         addExpenseRow(++serialCounter, "", 0);
     }
-
-
     private void addExpenseRow(int serial, String details, int amount){
 
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
@@ -198,7 +196,7 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
         serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         serialNo.setPadding(8, 8, 8, 8);
         serialNo.setTextColor(ContextCompat.getColor(this, R.color.black));
-        serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
+        serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);;
         serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
 
         EditText particulars = new EditText(this);
@@ -276,7 +274,6 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
 
         expensesTable.addView(newRow);
     }
-
     private void updateSerialNumbers() {
         TableLayout tableLayout = findViewById(R.id.expenses);
         int count = tableLayout.getChildCount();
@@ -383,15 +380,14 @@ public class agencies_history_save extends AppCompatActivity implements Navigati
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
+            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
-            startActivity(i);
-        }else if (id == R.id.nav_manage_user) {
-            Intent i = new Intent(this, agencies_history_edit.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
             logoutUser();
         }
 
+        // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }

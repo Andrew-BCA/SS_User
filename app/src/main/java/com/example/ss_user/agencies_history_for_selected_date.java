@@ -293,15 +293,14 @@ public class agencies_history_for_selected_date extends AppCompatActivity implem
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
+            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
-        }else if (id == R.id.nav_manage_user) {
-            Intent i = new Intent(this, agencies_history_edit.class);
-            startActivity(i);
         }else if (id == R.id.nav_log_out) {
-             logoutUser();
+            logoutUser();
         }
 
+        // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }

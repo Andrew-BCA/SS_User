@@ -27,7 +27,7 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/store"
+                style="@style/head"
                 android:textSize="25sp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"/>
@@ -39,6 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Selected Date: "
+            style="@style/body"
             android:textSize="18sp"
             android:textColor="@color/black"
             android:layout_below="@id/toolbar"
@@ -50,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pick a Date"
+            style="@style/button"
             android:textSize="16sp"
             android:textColor="@android:color/white"
             android:backgroundTint="@color/red"
@@ -66,6 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        style="@style/body"
         android:background="@android:color/white"
         app:itemTextColor="@color/black"
         app:menu="@menu/drawer_menu"/>

@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -45,8 +46,8 @@ import java.util.Map;
 public class expense_history_for_selected_date extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener  {
 
     private DrawerLayout drawerLayout;
-    private TableLayout expensesTable, currencyTable, financialSummaryTable;
-    private TextView currencyDropdown, financialSummaryDropdown;
+    private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
+    private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
     private DatabaseReference databaseRef;
 
     @Override
@@ -64,16 +65,76 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
      //   Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
 
 
-        databaseRef = FirebaseDatabase.getInstance().getReference(userType).child("Expenses");
+        databaseRef = FirebaseDatabase.getInstance().getReference(userType);
 
         // Initialize UI components
         initializeUIComponents();
 
         // Load existing expenses from Firebase
         loadExpensesFromDatabase();
+        loadAgenciesExpensesFromDatabase();
+        loadCurrencyData();
+        loadFinancialSummaryData();
 
-        // Add the header row
-        //  addHeaderRow();
+        TextView currencyDropdown = findViewById(R.id.currencyDropdown);
+        final TableLayout currencyTable = findViewById(R.id.currencyTable);
+
+        currencyDropdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currencyTable.getVisibility() == View.GONE) {
+                    currencyTable.setVisibility(View.VISIBLE);
+                    currencyDropdown.setText("Currency Denomination ▲");
+                } else {
+                    currencyTable.setVisibility(View.GONE);
+                    currencyDropdown.setText("Currency Denomination ▼");
+                }
+            }
+        });
+
+        TextView expenseDropdown = findViewById(R.id.expenseDropdown);
+        LinearLayout expenseLayout = findViewById(R.id.expenseLayout);
+
+        expenseDropdown.setOnClickListener(v -> {
+            if (expenseLayout.getVisibility() == View.VISIBLE) {
+                expenseLayout.setVisibility(View.GONE);
+                expenseDropdown.setText("Expense Details ▼");
+            } else {
+                expenseLayout.setVisibility(View.VISIBLE);
+                expenseDropdown.setText("Expense Details ▲");
+            }
+        });
+
+        TextView agenciesDropdown = findViewById(R.id.agenciesDropdown);
+        LinearLayout agenciesLayout = findViewById(R.id.agenciesLayout);
+
+        agenciesDropdown.setOnClickListener(v -> {
+            if (agenciesLayout.getVisibility() == View.VISIBLE) {
+                agenciesLayout.setVisibility(View.GONE);
+                agenciesDropdown.setText("Agencies ▼");
+            } else {
+                agenciesLayout.setVisibility(View.VISIBLE);
+                agenciesDropdown.setText("Agencies ▲");
+            }
+        });
+
+
+
+        TextView financialSummaryDropdown = findViewById(R.id.financialSummaryDropdown);
+        final TableLayout financialSummaryTable = findViewById(R.id.financialSummaryTable);
+
+        financialSummaryDropdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (financialSummaryTable.getVisibility() == View.GONE) {
+                    financialSummaryTable.setVisibility(View.VISIBLE);
+                    financialSummaryDropdown.setText("Financial Summary ▲");
+                } else {
+                    financialSummaryTable.setVisibility(View.GONE);
+                    financialSummaryDropdown.setText("Financial Summary ▼");
+                }
+            }
+        });
 
         // Initialize Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -84,8 +145,14 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
         // Initialize DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
+        agenciesTable = findViewById(R.id.agenciesexpenses);
+        expensesTable = findViewById(R.id.expenses);
+        drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
+        totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
+
 
         // Create Hamburger Menu Toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -93,6 +160,10 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+        currencyDropdown.setOnClickListener(v -> toggleVisibility(currencyTable, currencyDropdown, "Currency Denomination"));
+        financialSummaryDropdown.setOnClickListener(v -> toggleVisibility(financialSummaryTable, financialSummaryDropdown, "Financial Summary"));
+
     }
 
     private void initializeUIComponents() {
@@ -158,6 +229,43 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         // Finally, add the TableRow to your TableLayout
         expensesTable.addView(tableRow);
     }
+    private void addagenciesHeaderRow(){
+
+        // Create a new TableRow for agenciesTable
+        TableRow agenciesHeaderRow = new TableRow(this);
+        // Recreate the TextViews for the agencies header row
+        TextView agenciesSerialTextView = new TextView(this);
+        agenciesSerialTextView.setText("S.NO");
+        agenciesSerialTextView.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+        agenciesSerialTextView.setPadding(8, 8, 8, 8);
+        agenciesSerialTextView.setTextColor(ContextCompat.getColor(this, R.color.black));
+        agenciesSerialTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+
+        TextView agenciesParticularsTextView = new TextView(this);
+        agenciesParticularsTextView.setText("PARTICULARS");
+        agenciesParticularsTextView.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
+        agenciesParticularsTextView.setPadding(8, 8, 8, 8);
+        agenciesParticularsTextView.setTextColor(ContextCompat.getColor(this, R.color.black));
+        agenciesParticularsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        agenciesParticularsTextView.setGravity(Gravity.CENTER);
+
+        TextView agenciesAmountTextView = new TextView(this);
+        agenciesAmountTextView.setText("AMOUNT");
+        agenciesAmountTextView.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+        agenciesAmountTextView.setPadding(8, 8, 8, 8);
+        agenciesAmountTextView.setTextColor(ContextCompat.getColor(this, R.color.black));
+        agenciesAmountTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        agenciesAmountTextView.setGravity(Gravity.END);
+
+        // Add all views to the TableRow for agencies
+        agenciesHeaderRow.addView(agenciesSerialTextView);
+        agenciesHeaderRow.addView(agenciesParticularsTextView);
+        agenciesHeaderRow.addView(agenciesAmountTextView);
+
+        // Finally, add the TableRow to your agenciesTable
+        agenciesTable.addView(agenciesHeaderRow);
+    }
+
     private void toggleVisibility(TableLayout table, TextView dropdown, String label) {
         if (table.getVisibility() == View.GONE) {
             table.setVisibility(View.VISIBLE);
@@ -167,8 +275,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             dropdown.setText(label + " ▼");
         }
     }
-
-
     private void addExpenseRow(int serial, String details, int amount) {
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
@@ -241,12 +347,10 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         newRow.addView(amountField);
         expensesTable.addView(newRow);
     }
-
-
     private void loadExpensesFromDatabase() {
         SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
-        DatabaseReference expenseRef = databaseRef.child("ExpenseDetails").child(savedDate);
+        DatabaseReference expenseRef = databaseRef.child("Expenses").child("ExpenseDetails").child(savedDate);
 
         expenseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -319,7 +423,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
     private void loadFinancialSummaryData() {
         SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
-        DatabaseReference summaryRef = databaseRef.child("FinancialSummary").child(savedDate);
+        DatabaseReference summaryRef = databaseRef.child("Expenses").child("FinancialSummary").child(savedDate);
 
         summaryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -344,10 +448,143 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             }
         });
     }
+    private void loadAgenciesExpensesFromDatabase() {
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
+
+        expenseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                agenciesTable.removeAllViews(); // Clear existing rows
+                int totalAmount = 0; // Initialize total
+
+                if (!dataSnapshot.exists()) {
+                    addAgencyExpenseRow(1, "", 0); // Ensure header is added even if no data exists
+                } else {
+                    for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
+                        int serial = expenseSnapshot.child("serial").getValue(Integer.class);
+                        String details = expenseSnapshot.child("details").getValue(String.class);
+                        int amount = expenseSnapshot.child("amount").getValue(Integer.class);
+                        addAgencyExpenseRow(serial, details, amount);
+                        totalAmount += amount;
+                    }
+                    addTotalAgencies(totalAmount);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(expense_history_for_selected_date.this, "Failed to load agency expenses.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void addAgencyExpenseRow(int serial, String details, int amount) {
+        if (agenciesTable.getChildCount() == 0) { // Ensure header exists
+            addagenciesHeaderRow();
+        }
+
+        // Create a new TableRow programmatically
+        TableRow newRow = new TableRow(this);
+
+        TextView serialNo = new TextView(this);
+        serialNo.setText(String.valueOf(serial));  // Set incremented serial number
+        serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
+        serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        serialNo.setPadding(8, 8, 8, 8);
+        serialNo.setTextColor(ContextCompat.getColor(this, R.color.black));
+        serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
+        serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        TextView particulars = new TextView(this);
+        particulars.setHint("Enter details");
+        particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
+        particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        particulars.setPadding(8, 8, 8, 8);
+        particulars.setTextColor(ContextCompat.getColor(this, R.color.black));
+        particulars.setInputType(InputType.TYPE_CLASS_TEXT);
+        particulars.setGravity(Gravity.CENTER);
+        particulars.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
+        particulars.setText(details); // Set details
+
+        TextView amountField = new TextView(this);
+        amountField.setHint("0.00");
+        amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
+        amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        amountField.setPadding(8, 8, 8, 8);
+        amountField.setTextColor(ContextCompat.getColor(this, R.color.black));
+        amountField.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        amountField.setGravity(Gravity.END);
+        amountField.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+        amountField.setText(String.valueOf(amount)); // Set amount
+
+
+        // Store empty row in Firebase initially
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        DatabaseReference newExpenseRef = databaseRef.child("ExpenseDetails").child(todayDate).child(String.valueOf(serial));
+        Map<String, Object> expenseData = new HashMap<>();
+        expenseData.put("serial", serial);
+        expenseData.put("details", details);
+        expenseData.put("amount", amount);
+        newExpenseRef.setValue(expenseData);
+
+        // Add TextWatcher to update Firebase in real-time
+        particulars.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                newExpenseRef.child("details").setValue(s.toString().trim());
+            }
+        });
+
+        amountField.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                String value = s.toString().trim();
+                int price = value.isEmpty() ? 0 : Integer.parseInt(value);
+                newExpenseRef.child("amount").setValue(price);
+            }
+        });
+
+
+        newRow.addView(serialNo);
+        newRow.addView(particulars);
+        newRow.addView(amountField);
+        agenciesTable.addView(newRow); // Add to agenciesTable instead of expensesTable
+    }
+    private void addTotalAgencies(int totalAmount) {
+        TableRow totalRow = new TableRow(this);
+
+        TextView label = new TextView(this);
+        label.setText("Total");
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        label.setTextColor(ContextCompat.getColor(this, R.color.black));
+        label.setTypeface(null, Typeface.BOLD);
+        label.setPadding(8, 8, 8, 8);
+        label.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 12));
+        label.setGravity(Gravity.END);
+
+        TextView totalText = new TextView(this);
+        totalText.setText("₹" + totalAmount);
+        totalText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        totalText.setTextColor(ContextCompat.getColor(this, R.color.black));
+        totalText.setTypeface(null, Typeface.BOLD);
+        totalText.setPadding(8, 8, 8, 8);
+        totalText.setGravity(Gravity.END);
+        totalText.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        // Empty cell to match S.NO column space
+        TextView emptyCell = new TextView(this);
+        emptyCell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
+
+        totalRow.addView(emptyCell);   // for S.NO column
+        totalRow.addView(label);       // for PARTICULARS column
+        totalRow.addView(totalText);   // for AMOUNT column
+
+        agenciesTable.addView(totalRow);
+    }
     private void loadCurrencyData() {
         SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
-        DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination").child(savedDate);
+        DatabaseReference currencyRef = databaseRef.child("Expenses").child("CurrencyDenomination").child(savedDate);
 
         currencyRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -393,15 +630,14 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
+            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
-            startActivity(i);
-        }else if (id == R.id.nav_manage_user) {
-            Intent i = new Intent(this, agencies_history_edit.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
             logoutUser();
         }
 
+        // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }

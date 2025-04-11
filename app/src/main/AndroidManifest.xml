@@ -26,7 +26,8 @@
             android:exported="false" />
         <activity
             android:name=".expense_history_save"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".agencies_history_save"
             android:exported="false" />

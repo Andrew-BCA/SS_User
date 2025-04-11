@@ -297,21 +297,13 @@ public class agencies_history_edit extends AppCompatActivity implements Navigati
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            Intent i = new Intent(agencies_history_edit.this, expense_history_edit.class);
+            Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
             Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
-            Intent i = new Intent(agencies_history_edit.this, expense_history_date_selection.class);
-            startActivity(i);
-        }else if (id == R.id.nav_manage_user) {
-            // Handle Manage User navigation (e.g., start a new activity or fragment)
-            // Example:
-            Intent i = new Intent(agencies_history_edit.this, agencies_history_edit.class);
+            Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
-            // Handle Manage User navigation (e.g., start a new activity or fragment)
-            // Example:
-
             logoutUser();
         }
 

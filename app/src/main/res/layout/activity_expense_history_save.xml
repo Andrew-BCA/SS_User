@@ -25,12 +25,12 @@
             app:popupTheme="@style/CustomPopupMenu"
             app:menu="@menu/main_menu">
             <!-- Navigation Drawer -->
-
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/store"
+                style="@style/head"
                 android:textSize="25sp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"/>
@@ -47,38 +47,101 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Expenses Table (Main Content Area) -->
-                <ScrollView
+                <!-- Expense Details Dropdown -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:fillViewport="true"
-                    tools:ignore="NestedScrolling">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-                    <TableLayout
+                    <!-- Dropdown Button -->
+                    <TextView
+                        android:id="@+id/expenseDropdown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/expenses"
-                        android:background="@android:color/white">
+                        android:text="Expense Details ▼"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        style="@style/body"
+                        android:textColor="@color/black"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <!-- Expense Table (Initially Hidden) -->
+                    <LinearLayout
+                        android:id="@+id/expenseLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="vertical">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fillViewport="true">
+
+                            <TableLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/expenses"
+                                android:background="@android:color/white">
 
 
 
-                        <!-- Sample Expense Rows
-                          <TableRow>
-                            <TextView android:text="S.NO" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp"/>
-                            <TextView android:text="PARTICULARS" android:layout_weight="7" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="center"/>
-                            <TextView android:text="AMOUNT" android:layout_weight="5" android:padding="8dp" android:textColor="@color/black" android:textSize="20sp" android:gravity="end"/>
-                            <ImageView android:id="@+id/add" android:text="" android:layout_weight="1" android:padding="8dp" android:src="@drawable/plus" android:layout_marginTop="5dp"/>
-                        </TableRow>
+                            </TableLayout>
+                        </ScrollView>
+                    </LinearLayout>
+                </LinearLayout>
 
-                        <TableRow>
-                            <EditText android:id="@+id/sno" android:hint="1" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:inputType="number"/>
-                            <EditText android:id="@+id/particulare" android:hint="Enter details" android:layout_weight="7" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="center" android:inputType="text"/>
-                            <EditText android:id="@+id/amount" android:hint="0.00" android:layout_weight="5" android:padding="8dp" android:textColorHint="@color/black" android:textSize="15sp" android:gravity="end" android:inputType="numberDecimal"/>
-                            <ImageView android:id="@+id/delete" android:src="@drawable/delete" android:layout_marginTop="10dp"/>
-                        </TableRow>-->
+                <!-- Agencies Dropdown -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-                    </TableLayout>
-                </ScrollView>
+                    <!-- Dropdown Button -->
+
+                    <!-- Agencies Table (Initially Hidden) -->
+                    <TextView
+                        android:id="@+id/agenciesDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="Agencies ▼"
+                        style="@style/body"
+                        android:textColor="@color/black"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/agenciesLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="vertical">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fillViewport="true">
+
+                            <TableLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/agenciesexpenses"
+                                android:background="@android:color/white">
+                            </TableLayout>
+                        </ScrollView>
+
+                    </LinearLayout>
+                </LinearLayout>
+
 
                 <!-- Currency Denomination Dropdown -->
                 <LinearLayout
@@ -99,6 +162,7 @@
                         android:textColor="@color/black"
                         android:padding="12dp"
                         android:gravity="center"
+                        style="@style/body"
                         android:clickable="true"
                         android:focusable="true"/>
 
@@ -364,7 +428,7 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                                      <!-- Dropdown Button -->
+                    <!-- Dropdown Button -->
                     <TextView
                         android:id="@+id/financialSummaryDropdown"
                         android:layout_width="match_parent"
@@ -374,6 +438,7 @@
                         android:textStyle="bold"
                         android:textColor="@color/black"
                         android:padding="12dp"
+                        style="@style/body"
                         android:gravity="center"
                         android:clickable="true"
                         android:focusable="true"/>

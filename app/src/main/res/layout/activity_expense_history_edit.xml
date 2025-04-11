@@ -9,48 +9,46 @@
     tools:ignore="HardcodedText,Autofill,TextFields,ContentDescription">
 
 
-        <!-- Top Section -->
-        <LinearLayout
+    <!-- Top Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/top_expenses"
+        android:orientation="vertical">
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/top_expenses"
-            android:orientation="vertical">
+            android:layout_height="100dp"
+            android:padding="30dp"
+            android:background="@color/red"
+            android:elevation="4dp">
 
+            <!-- Toolbar Title (Centered) -->
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/store"
+                style="@style/head"
+                android:layout_marginTop="10dp"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center"/>
 
-            <!-- Toolbar -->
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:padding="30dp"
-                android:background="@color/red"
-                android:elevation="4dp">
-
-                <!-- Toolbar Title (Centered) -->
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/store"
-                    android:textSize="25sp"
-                    android:textColor="@android:color/white"
-                    android:layout_gravity="center"/>
-
-                <!-- Edit Button (Right-Aligned) -->
-                <TextView
-                    android:id="@+id/toolbar_menu1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="EDIT"
-                    android:textSize="25sp"
-                    android:textColor="@android:color/white"
-                    android:layout_gravity="end"
-                    android:layout_marginEnd="16dp"/>
-            </androidx.appcompat.widget.Toolbar>
-
-
-
+            <!-- Edit Button (Right-Aligned) -->
+            <TextView
+                android:id="@+id/toolbar_menu1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Edit"
+                style="@style/button"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:layout_gravity="end"
+                android:layout_marginEnd="16dp"/>
+        </androidx.appcompat.widget.Toolbar>
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -61,29 +59,113 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Expenses Table (Main Content Area) -->
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:fillViewport="true">
 
-                    <TableLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/expenses"
-                        android:background="@android:color/white">
-
-
-
-                    </TableLayout>
-                </ScrollView>
-
-                <!-- Currency Denomination Dropdown -->
+                <!-- Expense Details Dropdown -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- Dropdown Button -->
+                    <TextView
+                        android:id="@+id/expenseDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        style="@style/body"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="Expense Details ▼"
+                        android:textColor="@color/black"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <!-- Expense Table (Initially Hidden) -->
+                    <LinearLayout
+                        android:id="@+id/expenseLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        style="@style/body"
+                        android:visibility="gone">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fillViewport="true">
+
+                            <TableLayout
+                                android:id="@+id/expenses"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                style="@style/body"
+                                android:background="@android:color/white">
+
+
+                            </TableLayout>
+                        </ScrollView>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Agencies Dropdown -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    style="@style/body"
+                    android:padding="8dp">
+
+                    <!-- Dropdown Button -->
+
+                    <!-- Agencies Table (Initially Hidden) -->
+                    <TextView
+                        android:id="@+id/agenciesDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        style="@style/body"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="Agencies ▼"
+                        android:textColor="@color/black"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/agenciesLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fillViewport="true">
+
+                            <TableLayout
+                                android:id="@+id/agenciesexpenses"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                style="@style/body"
+                                android:background="@android:color/white">
+
+                            </TableLayout>
+                        </ScrollView>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+
+                <!-- Currency Denomination Dropdown -->
+                <LinearLayout
                     android:id="@+id/currency"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="8dp">
 
                     <!-- Dropdown Button -->
@@ -98,6 +180,7 @@
                         android:gravity="center"
                         android:padding="12dp"
                         android:text="Currency Denomination ▼"
+                        style="@style/body"
                         android:textColor="@color/black"
                         android:textSize="22sp"
                         android:textStyle="bold" />
@@ -106,9 +189,10 @@
                         android:id="@+id/currencyTable"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
                         android:background="@android:color/white"
-                        android:padding="8dp">
+                        style="@style/body"
+                        android:padding="8dp"
+                        android:visibility="gone">
 
                         <TableRow>
 
@@ -341,7 +425,6 @@
                         </TableRow>
 
 
-
                     </TableLayout>
                 </LinearLayout>
 
@@ -350,6 +433,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    style="@style/body"
                     android:padding="8dp">
 
                     <!-- Dropdown Button -->
@@ -357,65 +441,291 @@
                         android:id="@+id/financialSummaryDropdown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Financial Summary ▼"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:padding="12dp"
-                        android:gravity="center"
                         android:clickable="true"
-                        android:focusable="true"/>
+                        android:focusable="true"
+                        android:gravity="center"
+                        style="@style/body"
+                        android:padding="12dp"
+                        android:text="Financial Summary ▼"
+                        android:textColor="@color/black"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
 
                     <!-- TableLayout (Initially Hidden) -->
                     <TableLayout
                         android:id="@+id/financialSummaryTable"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
                         android:background="@android:color/white"
-                        android:padding="8dp">
+                        android:padding="8dp"
+                        android:visibility="gone">
 
-                        <TableRow><TextView android:hint="Opening Cash in Hand" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/opening_cash_in_hand" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Total Sales" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/totalsalesFS" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Received from Owner" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/receivedfromowner" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Credit Received" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/creditreceived" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Expenses" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/expensesfs" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="UPI Payments" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/upipayments" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Credit Sales" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/creditsales" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="Amount in Hand" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black"/> <TextView android:id="@+id/amountinhand" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
-                        <TableRow><TextView android:hint="End Cash" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="18sp" android:padding="12dp" android:gravity="center" android:textColorHint="@color/black" tools:ignore="TooManyViews" /> <TextView android:id="@+id/endcash" android:hint="Value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/black" android:textSize="20sp" android:padding="12dp"/></TableRow>
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Opening Cash in Hand"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/opening_cash_in_hand"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Total Sales"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/totalsalesFS"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Received from Owner"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/receivedfromowner"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Credit Received"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/creditreceived"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Expenses"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/expensesfs"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="UPI Payments"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/upipayments"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Credit Sales"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/creditsales"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Amount in Hand"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/amountinhand"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="End Cash"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="@color/black"
+                                android:textSize="18sp"
+                                tools:ignore="TooManyViews" />
+
+                            <TextView
+                                android:id="@+id/endcash"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Value"
+                                android:padding="12dp"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
+                        </TableRow>
 
                     </TableLayout>
                 </LinearLayout>
+
+
                 <TextView
-                    android:id="@+id/button_dang"
-                    android:padding="7dp"
+                    android:id="@+id/totalExpenseTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="170dp"
-                    android:layout_marginEnd="25dp"
-                    android:layout_marginBottom="150dp"
-                    android:layout_marginTop="25dp"
+                    android:text="Total Expense: ₹0"
+                    android:textStyle="bold"
+                    style="@style/body"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginTop="10dp"/>
+                <TextView
+                    android:id="@+id/totalAgencyExpenseTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total Agency Expense: ₹0"
+                    android:textStyle="bold"
+                    style="@style/body"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="10dp"/>
+
+                <TextView
+                    android:id="@+id/button_dang"
+                    style="@style/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button1"
                     android:text="Request Approval"
                     android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:background="@drawable/button1" />
+                    android:textSize="20sp" />
 
             </LinearLayout>
+
+
         </ScrollView>
-
-
-
     </LinearLayout>
-
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@android:color/white"
         app:itemTextColor="@color/black"
-        app:menu="@menu/drawer_menu"/>
+        app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

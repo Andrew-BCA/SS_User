@@ -9,6 +9,10 @@
 
     <item
         android:id="@+id/action_add_row"
-        android:title="@string/add_row"
+        android:title="Add Row For Expenses"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_add_row_agencies"
+        android:title="Add Row For Agencies"
         app:showAsAction="never" />
 </menu>

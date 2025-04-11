@@ -37,6 +37,18 @@
     <style name="CustomPopupMenu" parent="ThemeOverlay.MaterialComponents.Light">
         <item name="android:colorBackground">@color/white</item>
         <item name="android:textColorPrimary">@color/black</item> <!-- Text color -->
+        <item name="android:fontFamily">@font/robotoslabregular</item>
+    </style>
+    <style name="body">
+        <item name="android:fontFamily">@font/robotoslabregular</item>
+    </style>
+    <style name="button">
+        <item name="android:fontFamily">@font/playfairdisplaysemibold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="head">
+    <item name="android:fontFamily">@font/poppinsbold</item>
+    <item name="android:layout_marginTop">10dp</item>
     </style>
 
 

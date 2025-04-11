@@ -90,9 +90,10 @@ public class expense_history_date_selection extends AppCompatActivity implements
 
             // Show Popup only if the user is NOT from "store"
             if (!"store".equals(userSource)) {
-                showPopup(anchorView);
+                Intent i = new Intent(this, expense_history_for_selected_date.class);
+                startActivity(i);
             } else {
-                Intent i = new Intent(expense_history_date_selection.this, expense_history_edit.class);
+                Intent i = new Intent(this, expense_history_edit.class);
                 startActivity(i);
             }
         });
@@ -105,7 +106,7 @@ public class expense_history_date_selection extends AppCompatActivity implements
         editor.putString("selected_date", date);
         editor.apply();
     }
-    private void showPopup(View anchorView) {
+  /*  private void showPopup(View anchorView) {
         // Inflate the popup layout
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_expenses_or_agencies, null);
 
@@ -140,7 +141,7 @@ public class expense_history_date_selection extends AppCompatActivity implements
             Intent i = new Intent(expense_history_date_selection.this, agencies_history_for_selected_date.class);
             startActivity(i);
         });
-    }
+    }*/
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -149,15 +150,14 @@ public class expense_history_date_selection extends AppCompatActivity implements
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
+            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
-            startActivity(i);
-        }else if (id == R.id.nav_manage_user) {
-            Intent i = new Intent(this, agencies_history_edit.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
             logoutUser();
         }
 
+        // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
