@@ -24,9 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="@color/red"
-            android:elevation="4dp"
-            app:menu="@menu/req_approval"
-            >
+            android:elevation="4dp">
             <!-- Toolbar Title (Centered) -->
             <TextView
                 android:id="@+id/toolbar_title"
@@ -482,12 +480,6 @@
                     android:textSize="16sp"
                     android:textColor="@color/black"
                     android:layout_marginTop="10dp"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/request_access"
-                    android:text="Request Access"
-                    android:gravity="center_horizontal"/>
             </LinearLayout>
 
 

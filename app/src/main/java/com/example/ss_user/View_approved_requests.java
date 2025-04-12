@@ -43,7 +43,8 @@ public class View_approved_requests extends AppCompatActivity  implements Naviga
         toolbar_title.setText(userType);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
         recyclerView = findViewById(R.id.requestsRecyclerView);
         drawerLayout = findViewById(R.id.drawer_layout);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

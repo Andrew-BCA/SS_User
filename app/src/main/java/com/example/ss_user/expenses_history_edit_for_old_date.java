@@ -75,8 +75,6 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
         String branch = prefs.getString("selected_branch", "Default");
 
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
         Intent intent = getIntent();
         String userId = intent.getStringExtra("userId");
         String requestedDate = intent.getStringExtra("requestedDate");

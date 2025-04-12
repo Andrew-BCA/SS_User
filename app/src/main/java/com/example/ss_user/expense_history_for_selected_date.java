@@ -53,7 +53,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView,toolbar_title;
     private DatabaseReference databaseRef;
-    private Button request_access;
     private DatabaseReference requestRef;
 
 
@@ -81,20 +80,14 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         // Initialize UI components
         initializeUIComponents();
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar); // Make sure this is called!
+
         // Load existing expenses from Firebase
         loadExpensesFromDatabase();
         loadAgenciesExpensesFromDatabase();
         loadCurrencyData();
         loadFinancialSummaryData();
-        request_access = findViewById(R.id.request_access);
-        request_access.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendApprovalRequest();
-                Toast.makeText(expense_history_for_selected_date.this, "Success.", Toast.LENGTH_SHORT).show();
-
-            }
-        });
 
         TextView currencyDropdown = findViewById(R.id.currencyDropdown);
         final TableLayout currencyTable = findViewById(R.id.currencyTable);
@@ -155,8 +148,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
                 }
             }
         });
-        // Initialize Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
 
         // Initialize DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -165,6 +156,10 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        // Remove the title from the toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false); // Removes title from support action bar
+        toolbar.setTitle(""); // Removes title from the toolbar
+        toolbar.setSubtitle(""); // Removes any subtitle
         totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
 
@@ -178,7 +173,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
         currencyDropdown.setOnClickListener(v -> toggleVisibility(currencyTable, currencyDropdown, "Currency Denomination"));
         financialSummaryDropdown.setOnClickListener(v -> toggleVisibility(financialSummaryTable, financialSummaryDropdown, "Financial Summary"));
-
     }
 
     private void initializeUIComponents() {
@@ -707,7 +701,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.req_approval, menu);
