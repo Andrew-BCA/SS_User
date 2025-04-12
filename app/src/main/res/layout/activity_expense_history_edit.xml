@@ -679,7 +679,16 @@
 
                     </TableLayout>
                 </LinearLayout>
-
+                <Button
+                    android:id="@+id/button_dang"
+                    style="@style/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button1"
+                    android:layout_marginTop="25dp"
+                    android:text="Request Approval"
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:id="@+id/totalExpenseTextView"
@@ -690,7 +699,7 @@
                     style="@style/body"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    android:layout_marginTop="10dp"/>
+                    android:layout_marginTop="25dp"/>
                 <TextView
                     android:id="@+id/totalAgencyExpenseTextView"
                     android:layout_width="wrap_content"
@@ -702,16 +711,7 @@
                     android:textColor="@color/black"
                     android:layout_marginTop="10dp"/>
 
-                <TextView
-                    android:id="@+id/button_dang"
-                    style="@style/button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@drawable/button1"
-                    android:text="Request Approval"
-                    android:textColor="@color/white"
-                    android:textSize="20sp" />
+
 
             </LinearLayout>
 

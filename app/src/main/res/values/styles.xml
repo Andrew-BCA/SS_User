@@ -44,7 +44,7 @@
     </style>
     <style name="button">
         <item name="android:fontFamily">@font/playfairdisplaysemibold</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
     <style name="head">
     <item name="android:fontFamily">@font/poppinsbold</item>

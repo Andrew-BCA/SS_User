@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,6 +52,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     private DrawerLayout drawerLayout;
     private TextView EDIT;
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
+    private Button Request;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
     private DatabaseReference databaseRef;
     private int serialCounter = 0; // Global counter for serial numbers
@@ -80,6 +82,10 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
+        Request = findViewById(R.id.button_dang);
+        Request.setOnClickListener(view -> {
+           Toast.makeText(expense_history_edit.this, "Request Sent", Toast.LENGTH_SHORT).show();
+        });
 
         EDIT = findViewById(R.id.toolbar_menu1);
         EDIT.setOnClickListener(view -> {
