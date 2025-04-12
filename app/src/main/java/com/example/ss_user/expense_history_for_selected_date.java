@@ -7,10 +7,13 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -35,6 +38,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
@@ -49,6 +53,9 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView,toolbar_title;
     private DatabaseReference databaseRef;
+    private Button request_access;
+    private DatabaseReference requestRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +70,13 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
 
         // Use the retrieved data
      //   Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
-
-
         databaseRef = FirebaseDatabase.getInstance().getReference(userType);
         toolbar_title = findViewById(R.id.toolbar_title);
         totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
 
         toolbar_title.setText(userType);
+        requestRef = FirebaseDatabase.getInstance().getReference(userType).child(username).child("Requests");
 
         // Initialize UI components
         initializeUIComponents();
@@ -80,6 +86,15 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         loadAgenciesExpensesFromDatabase();
         loadCurrencyData();
         loadFinancialSummaryData();
+        request_access = findViewById(R.id.request_access);
+        request_access.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendApprovalRequest();
+                Toast.makeText(expense_history_for_selected_date.this, "Success.", Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
         TextView currencyDropdown = findViewById(R.id.currencyDropdown);
         final TableLayout currencyTable = findViewById(R.id.currencyTable);
@@ -449,8 +464,9 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         });
     }
     private void loadAgenciesExpensesFromDatabase() {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
+        SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
+        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(savedDate);
 
         expenseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -623,6 +639,40 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         EditText editText = findViewById(id);
         return editText.getText().toString().trim();
     }
+    private void sendApprovalRequest() {
+        // Debugging: Check if method is called
+        Toast.makeText(this, "Request Access clicked!", Toast.LENGTH_SHORT).show();
+
+        // Retrieve values from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Guest");
+        String userType = sharedPreferences.getString("userType", "Standard");
+        String savedDate = sharedPreferences.getString("selected_date", "No Date Selected");
+
+        // Create a reference to the 'Requests' node in Firebase
+        requestRef = FirebaseDatabase.getInstance().getReference("Requests").child(userType).child(savedDate).child(username);
+
+        // Create the data to be stored in Firebase
+        Map<String, Object> requestData = new HashMap<>();
+        requestData.put("userId", username);
+        requestData.put("userType", userType);
+        requestData.put("requestedDate", savedDate);
+        requestData.put("reason", "Requesting permission to edit old data");
+        requestData.put("status", "pending");
+        requestData.put("timestamp", ServerValue.TIMESTAMP);
+
+        // Save the data in Firebase under the generated request ID
+        requestRef.setValue(requestData)
+                .addOnSuccessListener(aVoid -> {
+                    // Show success message when data is stored successfully
+                    Toast.makeText(this, "Request sent!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Show error message if data could not be stored
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -631,15 +681,36 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
             logoutUser();
+        }else if (id == R.id.nav_View_approved_requests) {
+            Intent i = new Intent(this, View_approved_requests.class);
+            startActivity(i);
         }
 
         // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.Req_Approval) {
+            sendApprovalRequest();
+            Toast.makeText(this, "Request sent!", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.req_approval, menu);
         return true;
     }
     private void logoutUser() {

@@ -992,11 +992,13 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             Intent i = new Intent(this, expense_history_edit.class);
             startActivity(i);
         } else if (id == R.id.nav_create_user) {
-            Toast.makeText(this, "Create User Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, expense_history_date_selection.class);
             startActivity(i);
         }else if (id == R.id.nav_log_out) {
             logoutUser();
+        }else if (id == R.id.nav_View_approved_requests) {
+            Intent i = new Intent(this, View_approved_requests.class);
+            startActivity(i);
         }
 
         // Close drawer after selection
@@ -1035,7 +1037,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             return true;
         } else if (id == R.id.action_add_row_agencies) {
             addAgenciesRow();
-
         }
 
         return super.onOptionsItemSelected(item);

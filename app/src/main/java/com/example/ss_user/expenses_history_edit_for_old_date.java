@@ -1,5 +1,7 @@
 package com.example.ss_user;
 
+import static android.app.ProgressDialog.show;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,7 +9,10 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.InputType;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,17 +22,18 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.util.TypedValue;
 import android.widget.Toast;
-import android.view.Gravity;
-import android.text.InputType;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
@@ -44,22 +50,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import androidx.core.content.ContextCompat;
 
-public class expense_history_edit extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
+public class expenses_history_edit_for_old_date extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawerLayout;
-    private TextView EDIT;
+    private TextView saveButton;
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseRef,expensesRef,agenciesRef;
     private int serialCounter = 0; // Global counter for serial numbers
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_expense_history_edit);
+        setContentView(R.layout.activity_expenses_history_edit_for_old_date);
         // Retrieve SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "Guest");
@@ -71,33 +75,34 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
         String branch = prefs.getString("selected_branch", "Default");
 
-        // Initialize Firebase Database
-        databaseRef = FirebaseDatabase.getInstance().getReference(userType);
-        //databaseRefs = FirebaseDatabase.getInstance().getReference(branch).child("Agencies");
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        TextView toolbar_title = findViewById(R.id.toolbar_title);
-        toolbar_title.setText(userType);
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
 
         totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
 
-        EDIT = findViewById(R.id.toolbar_menu1);
-        EDIT.setOnClickListener(view -> {
-            Intent intent = new Intent(expense_history_edit.this, expense_history_save.class);
-            startActivity(intent);
-        });
+
+        // Initialize Firebase Database
+        databaseRef = FirebaseDatabase.getInstance().getReference(userType);
+        expensesRef = databaseRef.child("Expenses").child("ExpenseDetails").child(requestedDate);
+        agenciesRef = databaseRef.child("Agencies").child("ExpenseDetails").child(requestedDate);
+
+        //  databaseRefs = FirebaseDatabase.getInstance().getReference(branch).child("Agencies");
+        TextView toolbar_title = findViewById(R.id.toolbar_title);
+        toolbar_title.setText(userType);
 
         // Initialize UI components
         initializeUIComponents();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar); // Make sure this is called!
 
         // Load existing expenses from Firebase
         loadExpensesFromDatabase();
         loadAgenciesExpensesFromDatabase();
-
-        addHeaderRow();
 
         getNextSerialNumberFromDB();
         reorderSerialsAndUpdateFirebase();
@@ -187,6 +192,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         getSupportActionBar().setDisplayShowTitleEnabled(false); // Removes title from support action bar
         toolbar.setTitle(""); // Removes title from the toolbar
         toolbar.setSubtitle(""); // Removes any subtitle
+        saveButton = findViewById(R.id.toolbar_menu1);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -196,13 +202,16 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         currencyDropdown = findViewById(R.id.currencyDropdown);
         financialSummaryDropdown = findViewById(R.id.financialSummaryDropdown);
 
-
-
-
         // Toggle Dropdowns
         currencyDropdown.setOnClickListener(v -> toggleVisibility(currencyTable, currencyDropdown, "Currency Denomination"));
         financialSummaryDropdown.setOnClickListener(v -> toggleVisibility(financialSummaryTable, financialSummaryDropdown, "Financial Summary"));
 
+        // Save Expenses
+        if (saveButton != null) {
+            saveButton.setOnClickListener(v -> saveExpensesToDatabase());
+        } else {
+            Log.e("ERROR", "toolbar_menu1 not found! Check XML.");
+        }
 
 
         // Initialize Navigation Drawer Toggle
@@ -239,16 +248,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         amountTextView.setTextColor(ContextCompat.getColor(this, R.color.black));
         amountTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         amountTextView.setGravity(Gravity.END);
-
-        // Create the ADD ImageView
-        ImageView addImageView = new ImageView(this);
-        addImageView.setId(View.generateViewId()); // Generate a unique ID for the ImageView
-        addImageView.setImageResource(R.drawable.plus);
-        addImageView.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1));
-        addImageView.setPadding(8, 8, 8, 8);
-
-        // Set OnClickListener for the addImageView
-        addImageView.setOnClickListener(v -> addExpenseRow());
 
         // Add all views to the TableRow
         tableRow.addView(serialTextView);
@@ -311,7 +310,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         // Create a new TableRow programmatically
         TableRow newRow = new TableRow(this);
 
-        TextView serialNo = new TextView(this);
+        EditText serialNo = new EditText(this);
         serialNo.setText(String.valueOf(serial));  // Set incremented serial number
         serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -320,7 +319,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
         serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
 
-        TextView particulars = new TextView(this);
+        EditText particulars = new EditText(this);
         particulars.setHint("Enter details");
         particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -331,7 +330,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         particulars.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
         particulars.setText(details); // Set details
 
-        TextView amountField = new TextView(this);
+        EditText amountField = new EditText(this);
         amountField.setHint("0.00");
         amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -342,45 +341,46 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         amountField.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
         amountField.setText(String.valueOf(amount)); // Set amount
 
+        ImageView deleteButton = new ImageView(this);
+        deleteButton.setImageResource(R.drawable.delete);
+        deleteButton.setPadding(8, 8, 8, 8);
+        deleteButton.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+        deleteButton.setPadding(0, 10, 0, 0);
 
         // Store empty row in Firebase initially
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference newExpenseRef = databaseRef.child("Expenses").child("ExpenseDetails").child(todayDate).child(String.valueOf(serial));
+        DatabaseReference newExpenseRef = expensesRef.child(String.valueOf(serial));
         Map<String, Object> expenseData = new HashMap<>();
         expenseData.put("serial", serial);
         expenseData.put("details", details);
         expenseData.put("amount", amount);
         newExpenseRef.setValue(expenseData);
 
-        // Add TextWatcher to update Firebase in real-time
-        particulars.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                newExpenseRef.child("details").setValue(s.toString().trim());
+
+        // DELETE FUNCTIONALITY
+        // DELETE FUNCTIONALITY
+        deleteButton.setOnClickListener(v -> {
+            expensesTable.removeView(newRow); // Remove row from UI
+            newExpenseRef.removeValue();      // Remove from Firebase
+            updateSerialNumbers();           // Reindex and update DB
+
+            if (expensesTable.getChildCount() == 1) {
+                serialCounter = 0; // Reset if only header exists
             }
         });
 
-        amountField.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                String value = s.toString().trim();
-                int price = value.isEmpty() ? 0 : Integer.parseInt(value);
-                newExpenseRef.child("amount").setValue(price);
-            }
-        });
 
 
         newRow.addView(serialNo);
         newRow.addView(particulars);
         newRow.addView(amountField);
+        newRow.addView(deleteButton);
 
         expensesTable.addView(newRow);
     }
     private void loadExpensesFromDatabase() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference expenseRef = databaseRef.child("Expenses").child("ExpenseDetails").child(todayDate);
-
-        expenseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        expensesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 expensesTable.removeAllViews(); // Clear existing rows
@@ -402,8 +402,8 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                         addExpenseRow(serial, details, amount);
                         totalAmount += amount;
                     }
-                    addTotalRow(totalAmount);
                     totalExpenseTextView.setText("Total Expense: ₹" + totalAmount);
+
 
                 }
 
@@ -416,7 +416,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(expense_history_edit.this, "Failed to load expenses.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Failed to load expenses.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -438,7 +438,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         // Create a new TableRow programmatically
         TableRow newRow = new TableRow(this);
 
-        TextView serialNo = new TextView(this);
+        EditText serialNo = new EditText(this);
         serialNo.setText(String.valueOf(serial));  // Set incremented serial number
         serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -447,7 +447,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
         serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
 
-        TextView particulars = new TextView(this);
+        EditText particulars = new EditText(this);
         particulars.setHint("Enter details");
         particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -458,7 +458,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         particulars.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
         particulars.setText(details); // Set details
 
-        TextView amountField = new TextView(this);
+        EditText amountField = new EditText(this);
         amountField.setHint("0.00");
         amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -469,9 +469,15 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         amountField.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
         amountField.setText(String.valueOf(amount)); // Set amount
 
+        ImageView deleteButton = new ImageView(this);
+        deleteButton.setImageResource(R.drawable.delete);
+        deleteButton.setPadding(8, 8, 8, 8);
+        deleteButton.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+        deleteButton.setPadding(0, 10, 0, 0);
+
         // Store empty row in Firebase initially
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference newExpenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate).child(String.valueOf(serial));
+        DatabaseReference newExpenseRef = agenciesRef.child(String.valueOf(serial));
         Map<String, Object> expenseData = new HashMap<>();
         expenseData.put("serial", serial);
         expenseData.put("details", details);
@@ -495,19 +501,78 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
 
+        // DELETE FUNCTIONALITY
+        deleteButton.setOnClickListener(v -> {
+            agenciesTable.removeView(newRow); // Remove row from UI
+            newExpenseRef.removeValue(); // Remove from Firebase
+            reorderSerialsAndUpdateFirebase();
+
+            // If all rows (except header) are deleted, reset counter
+            if (agenciesTable.getChildCount() == 1) { // Only header exists
+                serialCounter = 0;
+            }
+        });
 
 
         newRow.addView(serialNo);
         newRow.addView(particulars);
         newRow.addView(amountField);
+        newRow.addView(deleteButton);
 
         agenciesTable.addView(newRow);
     }
+    private void updateSerialNumbers() {
+        TableLayout tableLayout = findViewById(R.id.expenses);
+        int count = tableLayout.getChildCount();
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());;
+
+        if (count <= 1) return;
+
+        int newSerial = 1;
+        Map<String, Object> updates = new HashMap<>();
+
+        for (int i = 1; i < count; i++) { // Skip header
+            TableRow row = (TableRow) tableLayout.getChildAt(i);
+            EditText serialNo = (EditText) row.getChildAt(0);
+            EditText details = (EditText) row.getChildAt(1);
+            EditText amount = (EditText) row.getChildAt(2);
+
+            // Get previous serial (to delete if changed)
+            int oldSerial = Integer.parseInt(serialNo.getText().toString().trim());
+
+            // Set new serial number in UI
+            serialNo.setText(String.valueOf(newSerial));
+
+            // Get current data
+            String detailText = details.getText().toString().trim();
+            int amountValue = amount.getText().toString().trim().isEmpty() ? 0 : Integer.parseInt(amount.getText().toString().trim());
+
+            // Remove old serial entry and create new one in Firebase
+            if (oldSerial != newSerial) {
+                expensesRef.child(String.valueOf(oldSerial)).removeValue();
+            }
+
+            Map<String, Object> expenseData = new HashMap<>();
+            expenseData.put("serial", newSerial);
+            expenseData.put("details", detailText);
+            expenseData.put("amount", amountValue);
+            updates.put(String.valueOf(newSerial), expenseData);
+
+            newSerial++;
+        }
+
+        expensesRef.updateChildren(updates).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Serial numbers updated", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        serialCounter = newSerial - 1; // Update serial counter
+    }
     private void getNextSerialNumberFromDB() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference expenseRef = databaseRef.child("Expenses").child("ExpenseDetails").child(todayDate);
 
-        expenseRef.orderByChild("serial").limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+        expensesRef.orderByChild("serial").limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int maxSerial = 0;
@@ -522,21 +587,16 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(expense_history_edit.this, "Error getting max serial", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Error getting max serial", Toast.LENGTH_SHORT).show();
             }
         });
     }
     private void saveExpensesToDatabase() {
-        DatabaseReference expenseRef = databaseRef.child("ExpenseDetails");
-
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
         int rowCount = expensesTable.getChildCount();
         if (rowCount <= 0) {
             Toast.makeText(this, "No expenses to save", Toast.LENGTH_SHORT).show();
             return;
         }
-
         for (int i = 1; i < rowCount; i++) {
             TableRow row = (TableRow) expensesTable.getChildAt(i);
 
@@ -556,7 +616,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                     expenseData.put("amount", price);
 
                     // Store under "expenses -> serialNo -> data"
-                    expenseRef.child(todayDate).child(String.valueOf(serial)).setValue(expenseData);
+                    expensesRef.child(String.valueOf(serial)).setValue(expenseData);
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();
@@ -570,9 +630,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         Toast.makeText(this, "Expenses saved successfully!", Toast.LENGTH_SHORT).show();
     }
     private void saveAgenciesExpensesToDatabase() {
-        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails");
-
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
         int rowCount = agenciesTable.getChildCount();
         if (rowCount <= 0) {
@@ -599,7 +656,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                     expenseData.put("amount", price);
 
                     // Store under "expenses -> serialNo -> data"
-                    expenseRef.child(todayDate).child(String.valueOf(serial)).setValue(expenseData);
+                    agenciesRef.child(String.valueOf(serial)).setValue(expenseData);
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();
@@ -612,7 +669,10 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         Toast.makeText(this, "Expenses saved successfully!", Toast.LENGTH_SHORT).show();
     }
     private void saveCurrencyData() {
-        DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination");
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
+        DatabaseReference currencyRef = databaseRef.child("Expenses").child("CurrencyDenomination");
 
         Map<String, Object> currencyData = new HashMap<>();
         currencyData.put("500", getTextValue(R.id.fivehundred));
@@ -626,12 +686,14 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         currencyData.put("Others", getTextValue(R.id.others));
         currencyData.put("TotalSales", getTextValue(R.id.totalsales));
 
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        currencyRef.child(todayDate).setValue(currencyData);
+        currencyRef.child(requestedDate).setValue(currencyData);
     }
     private void saveFinancialSummaryData() {
-        DatabaseReference summaryRef = databaseRef.child("FinancialSummary");
+        DatabaseReference summaryRef = databaseRef.child("Expenses").child("FinancialSummary");
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
 
         Map<String, Object> summaryData = new HashMap<>();
         summaryData.put("OpeningCashInHand", getTextValue(R.id.opening_cash_in_hand));
@@ -644,14 +706,14 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         summaryData.put("AmountInHand", getTextValue(R.id.amountinhand));
         summaryData.put("EndCash", getTextValue(R.id.endcash));
 
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        summaryRef.child(todayDate).setValue(summaryData);
+        summaryRef.child(requestedDate).setValue(summaryData);
     }
     private void loadFinancialSummaryData() {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-        DatabaseReference summaryRef = databaseRef.child("FinancialSummary").child(todayDate);
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
+        DatabaseReference summaryRef = databaseRef.child("Expenses").child("FinancialSummary").child(requestedDate);
 
         summaryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -672,13 +734,15 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(expense_history_edit.this, "Failed to load financial summary.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Failed to load financial summary.", Toast.LENGTH_SHORT).show();
             }
         });
     }
     private void loadCurrencyData() {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination").child(todayDate);
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
+        DatabaseReference currencyRef = databaseRef.child("Expenses").child("CurrencyDenomination").child(requestedDate);
 
         currencyRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -700,7 +764,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(expense_history_edit.this, "Failed to load currency data.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Failed to load currency data.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -748,7 +812,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         // Finally, add the TableRow to your agenciesTable
         agenciesTable.addView(agenciesHeaderRow);
     }
-
     private void addAgencyExpenseRow(int serial, String details, int amount) {
         if (agenciesTable.getChildCount() == 0) { // Ensure header exists
             addagenciesHeaderRow();
@@ -757,7 +820,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         // Create a new TableRow programmatically
         TableRow newRow = new TableRow(this);
 
-        TextView serialNo = new TextView(this);
+        EditText serialNo = new EditText(this);
         serialNo.setText(String.valueOf(serial));  // Set incremented serial number
         serialNo.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         serialNo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -766,7 +829,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         serialNo.setInputType(InputType.TYPE_CLASS_NUMBER);
         serialNo.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
 
-        TextView particulars = new TextView(this);
+        EditText particulars = new EditText(this);
         particulars.setHint("Enter details");
         particulars.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         particulars.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -777,7 +840,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         particulars.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 7));
         particulars.setText(details); // Set details
 
-        TextView amountField = new TextView(this);
+        EditText amountField = new EditText(this);
         amountField.setHint("0.00");
         amountField.setHintTextColor(ContextCompat.getColor(this, R.color.black));
         amountField.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -788,10 +851,18 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         amountField.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
         amountField.setText(String.valueOf(amount)); // Set amount
 
+        ImageView deleteButton = new ImageView(this);
+        deleteButton.setImageResource(R.drawable.delete);
+        deleteButton.setPadding(8, 8, 8, 8);
+        deleteButton.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+        deleteButton.setPadding(0, 10, 0, 0);
+
 
         // Store empty row in Firebase initially
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference newExpenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate).child(String.valueOf(serial));
+        Intent intent = getIntent();
+        String userId = intent.getStringExtra("userId");
+        String requestedDate = intent.getStringExtra("requestedDate");
+        DatabaseReference newExpenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(requestedDate).child(String.valueOf(serial));
         Map<String, Object> expenseData = new HashMap<>();
         expenseData.put("serial", serial);
         expenseData.put("details", details);
@@ -802,14 +873,23 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         newRow.addView(serialNo);
         newRow.addView(particulars);
         newRow.addView(amountField);
+        newRow.addView(deleteButton);
         agenciesTable.addView(newRow); // Add to agenciesTable instead of expensesTable
 
+        // DELETE FUNCTIONALITY
+        deleteButton.setOnClickListener(v -> {
+            agenciesTable.removeView(newRow); // Remove row from UI
+            newExpenseRef.removeValue(); // Remove from Firebase
+            reorderSerialsAndUpdateFirebase(); // Update serial numbers dynamically
+
+            // If all rows (except header) are deleted, reset counter
+            if (expensesTable.getChildCount() == 1) { // Only header exists
+                serialCounter = 0;
+            }
+        });
     }
     private void loadAgenciesExpensesFromDatabase() {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
-
-        expenseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        agenciesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 agenciesTable.removeAllViews(); // Clear existing rows
@@ -825,15 +905,15 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                         addAgencyExpenseRow(serial, details, amount);
 
                         totalAmount += amount;
-                    }}
-                addTotalAgencies(totalAmount);
-                totalAgencyExpenseTextView.setText("Total Agency Expense: ₹" + totalAmount);
 
+                    }}
+
+                totalAgencyExpenseTextView.setText("Total Agency Expense: ₹" + totalAmount);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(expense_history_edit.this, "Failed to load agency expenses.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Failed to load agency expenses.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -867,6 +947,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         totalRow.addView(totalText);   // for AMOUNT column
 
         agenciesTable.addView(totalRow);
+
     }
     private void reorderSerialsAndUpdateFirebase() {
         TableLayout tableLayout = findViewById(R.id.expenses);
@@ -876,8 +957,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         int serialNumber = 1;
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference expenseRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
-
         Map<String, Object> updatedEntries = new HashMap<>();
         List<String> oldSerialsToDelete = new ArrayList<>();
 
@@ -914,11 +993,11 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         // Remove old serials (those that changed position)
         for (String oldSerial : oldSerialsToDelete) {
-            expenseRef.child(oldSerial).removeValue();
+            agenciesRef.child(oldSerial).removeValue();
         }
 
         // Write updated ones
-        expenseRef.updateChildren(updatedEntries).addOnCompleteListener(task -> {
+        agenciesRef.updateChildren(updatedEntries).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Serials synced with DB", Toast.LENGTH_SHORT).show();
             }
@@ -944,6 +1023,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             Intent i = new Intent(this, View_approved_requests.class);
             startActivity(i);
         }
+
         // Close drawer after selection
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -960,12 +1040,40 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         startActivity(intent);
     }
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.action_save) {
             // Handle Save button click
             saveExpensesToDatabase();
+            Toast.makeText(this, "Expenses Updated successfully!", Toast.LENGTH_SHORT).show();
+            // Get intent extras
+            String userId = getIntent().getStringExtra("userId");
+            String requestedDate = getIntent().getStringExtra("requestedDate");
+            String userType = getIntent().getStringExtra("userType");
+
+            // Delete from Approved in Firebase
+            DatabaseReference approvedRef = FirebaseDatabase.getInstance()
+                    .getReference("Approved")
+                    .child(userType)
+                    .child(requestedDate)
+                    .child(userId);
+
+            approvedRef.removeValue().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "Request removed from Approved", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Failed to remove request", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            Intent i = new Intent(this, expense_history_edit.class);
+            startActivity(i);
             return true;
         } else if (id == R.id.action_add_row) {
             // Handle Add Row button click
@@ -973,7 +1081,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             return true;
         } else if (id == R.id.action_add_row_agencies) {
             addAgenciesRow();
-
         }
 
         return super.onOptionsItemSelected(item);

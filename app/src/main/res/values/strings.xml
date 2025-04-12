@@ -45,6 +45,22 @@ Enter Name
     <string name="agencies">Agencies</string>
     <string name="add_row">Add Row</string>
     <string name="save">Save</string>
+    <string name="request_access">Request Access</string>
+    <string name="home">Home</string>
+    <string name="manage_user">Manage User</string>
+    <string name="expense_history">Expense History</string>
+    <string name="export_data">Export Data</string>
+    <string name="view_access_request">View Access Request</string>
+    <string name="logout">logout</string>
+    <string name="add_row_for_expenses">Add Row For Expenses</string>
+    <string name="add_row_for_agencies">Add Row For Agencies</string>
+    <string name="accept">Accept</string>
+    <string name="deny">Deny</string>
+    <string name="status">Status</string>
+    <string name="reason">Reason</string>
+    <string name="requested_date">Requested Date</string>
+    <string name="user_id">User ID</string>
+
 
 
 </resources>

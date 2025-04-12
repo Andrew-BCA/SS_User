@@ -9,6 +9,9 @@
         android:id="@+id/nav_create_user"
         android:title="Expense Record"/>
     <item
+        android:id="@+id/nav_View_approved_requests"
+        android:title="View Approved Requests"/>
+    <item
         android:id="@+id/nav_log_out"
         android:title="Logout" />
 
