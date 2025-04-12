@@ -19,6 +19,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,12 +54,19 @@ public class MainActivity extends AppCompatActivity {
         TextView loginButton = findViewById(R.id.logbtn);
         TextView forgetPass = findViewById(R.id.forget_pass);
 
+        String username = usernameEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> {
+            // Save the token under the User's ID
+            FirebaseDatabase.getInstance().getReference("UserTokens")
+                    .child(username)  // Store token under user’s ID
+                    .setValue(token);
+        });
+
         sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
         loginButton.setOnClickListener(v -> {
-            String username = usernameEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
-
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(MainActivity.this, "Please enter both username and password", Toast.LENGTH_SHORT).show();
             } else {
