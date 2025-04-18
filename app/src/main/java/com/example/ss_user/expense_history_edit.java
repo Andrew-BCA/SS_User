@@ -657,7 +657,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     private void loadFinancialSummaryData() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        DatabaseReference summaryRef = databaseRef.child("FinancialSummary").child(todayDate);
+        DatabaseReference summaryRef = databaseRef.child("Expenses").child("FinancialSummary").child(todayDate);
 
         summaryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -684,7 +684,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     }
     private void loadCurrencyData() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference currencyRef = databaseRef.child("CurrencyDenomination").child(todayDate);
+        DatabaseReference currencyRef = databaseRef.child("Expenses").child("CurrencyDenomination").child(todayDate);
 
         currencyRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
