@@ -3,16 +3,20 @@ package com.example.ss_user;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.util.Log;
-import android.view.Menu;
+import android.view.LayoutInflater;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -26,11 +30,13 @@ import android.text.InputType;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,6 +52,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 
 public class expense_history_edit extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -67,8 +76,78 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         String username = sharedPreferences.getString("username", "Guest");
         String userType = sharedPreferences.getString("userType", "Standard");
 
-        // Use the retrieved data
-        //  Toast.makeText(this, "Logged in as: " + username + " (" + userType + ")", Toast.LENGTH_LONG).show();
+        DatabaseReference StoreRef = FirebaseDatabase.getInstance().getReference("Approved").child(userType);
+
+        DatabaseReference rejStoreRef = FirebaseDatabase.getInstance().getReference("Rejected").child(userType);
+
+        // Attach listener
+        rejStoreRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
+                    String requestDate = dateSnapshot.getKey(); // "2025-03-01"
+
+                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) { // Loop through users
+                        String username = userSnapshot.getKey(); // "Andrew"
+                        Request request = userSnapshot.getValue(Request.class);
+
+                        // Build detailed notification message
+                        String message = "Your access to update data for the date: " + requestDate +" has been rejected";
+                        String title = userType+" request rejected";
+
+                        NotificationHelper.showNotification(
+                                expense_history_edit.this,
+                                title,
+                                message
+                        );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
+            }
+        });
+
+        StoreRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
+                    String requestDate = dateSnapshot.getKey(); // "2025-03-01"
+
+                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) { // Loop through users
+                        String username = userSnapshot.getKey(); // "Andrew"
+                        Request request = userSnapshot.getValue(Request.class);
+
+                        // Build detailed notification message
+                        String message = "Your access to update data for the date: " + requestDate +" has been approved";
+                        String title = userType+" request approved";
+
+
+                        NotificationHelper.showNotification(
+                                expense_history_edit.this,
+                                title,
+                                message
+                        );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
+            }
+        });
+
+        FloatingActionButton fabChat = findViewById(R.id.fab_chat);
+
+        fabChat.setOnClickListener(v -> {
+            showChatPopup();
+        });
+
+
+
 
         SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
         String branch = prefs.getString("selected_branch", "Default");
@@ -183,6 +262,66 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         currencyDropdown.setOnClickListener(v -> toggleVisibility(currencyTable, currencyDropdown, "Currency Denomination"));
         financialSummaryDropdown.setOnClickListener(v -> toggleVisibility(financialSummaryTable, financialSummaryDropdown, "Financial Summary"));
 
+    }
+    private void showChatPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_chat, null);
+        builder.setView(dialogView);
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Guest");
+        String userType = sharedPreferences.getString("userType", "Standard");
+
+        AlertDialog chatDialog = builder.create();
+        chatDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // optional: make corners soft
+        chatDialog.show();
+
+        // Now set up everything inside the dialog
+        EditText editTextMessage = dialogView.findViewById(R.id.editTextMessage);
+        ImageButton buttonSend = dialogView.findViewById(R.id.buttonSend);
+        RecyclerView recyclerViewChat = dialogView.findViewById(R.id.recyclerViewChat);
+
+        List<ChatMessage> chatList = new ArrayList<>();
+        ChatAdapter chatAdapter = new ChatAdapter(chatList);
+        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewChat.setAdapter(chatAdapter);
+
+        DatabaseReference chatReference = FirebaseDatabase.getInstance().getReference("chat_remarks").child(userType)
+                .child(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+
+        // Load chat history
+        chatReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                chatList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    ChatMessage message = dataSnapshot.getValue(ChatMessage.class);
+                    if (message != null) {
+                        chatList.add(message);
+                    }
+                }
+                chatAdapter.notifyDataSetChanged();
+                recyclerViewChat.scrollToPosition(chatList.size() - 1);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+        // Sending message
+        buttonSend.setOnClickListener(v -> {
+            String text = editTextMessage.getText().toString().trim();
+            if (!text.isEmpty()) {
+                String id = chatReference.push().getKey();
+                ChatMessage message = new ChatMessage(id, text, "user", System.currentTimeMillis());
+
+                if (id != null) {
+                    chatReference.child(id).setValue(message);
+                }
+                editTextMessage.setText("");
+            }
+        });
     }
 
     private void initializeUIComponents() {

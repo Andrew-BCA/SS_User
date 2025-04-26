@@ -60,7 +60,7 @@ Enter Name
     <string name="reason">Reason</string>
     <string name="requested_date">Requested Date</string>
     <string name="user_id">User ID</string>
-
+    <string name="sent_message">Sent message</string>
 
 
 </resources>
