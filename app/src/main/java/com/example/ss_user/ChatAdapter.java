@@ -16,24 +16,21 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_RECEIVED = 2;
 
     private List<ChatMessage> messageList;
+    private String userType;
 
-    public ChatAdapter(List<ChatMessage> messageList) {
+    public ChatAdapter(List<ChatMessage> messageList, String userType) {
         this.messageList = messageList;
+        this.userType = userType;
     }
 
     @Override
     public int getItemViewType(int position) {
         ChatMessage message = messageList.get(position);
-        if ("user".equals(message.getSender())) {
-            return TYPE_SENT;
-        } else {
-            return TYPE_RECEIVED;
-        }
+        return message.getSender().equals(userType) ? TYPE_SENT : TYPE_RECEIVED;
     }
 
-    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_SENT) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
             return new SentMessageHolder(view);
@@ -44,11 +41,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
         if (holder instanceof SentMessageHolder) {
             ((SentMessageHolder) holder).bind(message);
-        } else if (holder instanceof ReceivedMessageHolder) {
+        } else {
             ((ReceivedMessageHolder) holder).bind(message);
         }
     }

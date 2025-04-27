@@ -282,7 +282,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         RecyclerView recyclerViewChat = dialogView.findViewById(R.id.recyclerViewChat);
 
         List<ChatMessage> chatList = new ArrayList<>();
-        ChatAdapter chatAdapter = new ChatAdapter(chatList);
+        ChatAdapter chatAdapter = new ChatAdapter(chatList,userType);
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewChat.setAdapter(chatAdapter);
 
@@ -314,7 +314,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             String text = editTextMessage.getText().toString().trim();
             if (!text.isEmpty()) {
                 String id = chatReference.push().getKey();
-                ChatMessage message = new ChatMessage(id, text, "user", System.currentTimeMillis());
+                ChatMessage message = new ChatMessage(id, text, userType, System.currentTimeMillis());
 
                 if (id != null) {
                     chatReference.child(id).setValue(message);
