@@ -161,7 +161,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         totalExpenseTextView = findViewById(R.id.totalExpenseTextView);
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
-        Request = findViewById(R.id.button_dang);
+       Request = findViewById(R.id.button_dang);
         Request.setOnClickListener(view -> {
            Toast.makeText(expense_history_edit.this, "Request Sent", Toast.LENGTH_SHORT).show();
         });
@@ -443,6 +443,9 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         expensesTable.addView(totalRow);
     }
     private void addExpenseRow() {
+        if (expensesTable.getChildCount() == 1) {
+            serialCounter = 1;
+        }
         serialCounter++; // increment before using
         addExpenseRow(serialCounter, "", 0);
     }

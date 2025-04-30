@@ -377,7 +377,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
                 if (!dataSnapshot.exists()) {
                     // If no data exists, add an empty row
-                    addExpenseRow(serialCounter++, "", 0);
+                    addExpenseRow(1, "", 0);
                 } else {
                     for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
                         Integer serialObj = expenseSnapshot.child("serial").getValue(Integer.class);
