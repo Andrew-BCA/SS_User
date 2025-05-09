@@ -63,7 +63,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private Button Request;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseRef,dbnotify;
     private int serialCounter = 0; // Global counter for serial numbers
 
     @Override
@@ -77,29 +77,36 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         String userType = sharedPreferences.getString("userType", "Standard");
 
         DatabaseReference StoreRef = FirebaseDatabase.getInstance().getReference("Approved").child(userType);
-
         DatabaseReference rejStoreRef = FirebaseDatabase.getInstance().getReference("Rejected").child(userType);
 
-        // Attach listener
+// Attach listener for Rejected
         rejStoreRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
-                    String requestDate = dateSnapshot.getKey(); // "2025-03-01"
+                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
+                    String requestDate = dateSnapshot.getKey();
 
-                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) { // Loop through users
-                        String username = userSnapshot.getKey(); // "Andrew"
+                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) {
+                        String username = userSnapshot.getKey();
                         Request request = userSnapshot.getValue(Request.class);
 
-                        // Build detailed notification message
-                        String message = "Your access to update data for the date: " + requestDate +" has been rejected";
-                        String title = userType+" request rejected";
+                        if (request != null && userSnapshot.hasChild("notify") &&
+                                "true".equalsIgnoreCase(userSnapshot.child("notify").getValue(String.class))) {
+                            // Build notification message
+                            String message = "Your access to update data for the date: " + requestDate + " has been rejected";
+                            String title = userType + " request rejected";
 
-                        NotificationHelper.showNotification(
-                                expense_history_edit.this,
-                                title,
-                                message
-                        );
+                            NotificationHelper.showNotification(
+                                    expense_history_edit.this,
+                                    title,
+                                    message
+                            );
+
+                            // Update notify to false
+                            userSnapshot.getRef().child("notify").setValue("false")
+                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Rejected notify set to false"))
+                                    .addOnFailureListener(e -> Log.e("Firebase", "Error updating notify", e));
+                        }
                     }
                 }
             }
@@ -110,26 +117,34 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
 
+// Attach listener for Approved
         StoreRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
-                    String requestDate = dateSnapshot.getKey(); // "2025-03-01"
+                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
+                    String requestDate = dateSnapshot.getKey();
 
-                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) { // Loop through users
-                        String username = userSnapshot.getKey(); // "Andrew"
+                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) {
+                        String username = userSnapshot.getKey();
                         Request request = userSnapshot.getValue(Request.class);
 
-                        // Build detailed notification message
-                        String message = "Your access to update data for the date: " + requestDate +" has been approved";
-                        String title = userType+" request approved";
+                        if (request != null && userSnapshot.hasChild("notify") &&
+                                "true".equalsIgnoreCase(userSnapshot.child("notify").getValue(String.class))) {
+                            // Build notification message
+                            String message = "Your access to update data for the date: " + requestDate + " has been approved";
+                            String title = userType + " request approved";
 
+                            NotificationHelper.showNotification(
+                                    expense_history_edit.this,
+                                    title,
+                                    message
+                            );
 
-                        NotificationHelper.showNotification(
-                                expense_history_edit.this,
-                                title,
-                                message
-                        );
+                            // Update notify to false
+                            userSnapshot.getRef().child("notify").setValue("false")
+                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Approved notify set to false"))
+                                    .addOnFailureListener(e -> Log.e("Firebase", "Error updating notify", e));
+                        }
                     }
                 }
             }
@@ -323,7 +338,48 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
     }
+    private void notificationCheck(){
+        SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
+        String branch = prefs.getString("selected_branch", "Default");
 
+        dbnotify = FirebaseDatabase.getInstance().getReference(branch);
+
+
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        dbnotify.child(todayDate).child("Status").setValue("Approved");
+        DatabaseReference ageref = FirebaseDatabase.getInstance().getReference(branch).child("Agencies").child("ExpenseDetails").child(todayDate);
+
+        // Attach listener
+        dbnotify.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
+                if (dataSnapshot.exists()) {
+                    String requestDate = dataSnapshot.getKey(); // "Serial no
+
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) { // Loop through users
+                        String username = userSnapshot.getKey(); // "Andrew"
+                        Request request = userSnapshot.getValue(Request.class);
+
+                        // Build detailed notification message
+                        String message = "Expenses for the date: " + todayDate +" has been approved";
+                        String title = branch+" request for daily approval";
+
+                        NotificationHelper.showNotification(
+                                expense_history_edit.this,
+                                title,
+                                message
+                        );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
+            }
+        });
+    }
     private void initializeUIComponents() {
         // Initialize Toolbar & Save Button
         Toolbar toolbar = findViewById(R.id.toolbar);

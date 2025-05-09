@@ -58,6 +58,8 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
     private DatabaseReference databaseRef,expensesRef,agenciesRef;
     private int serialCounter = 0; // Global counter for serial numbers
+    private int serialCounterExpenses = 0;
+    private int serialCounterAgencies = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +105,7 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         loadAgenciesExpensesFromDatabase();
 
         getNextSerialNumberFromDB();
-        reorderSerialsAndUpdateFirebase();
+
 
         TextView currencyDropdown = findViewById(R.id.currencyDropdown);
         final TableLayout currencyTable = findViewById(R.id.currencyTable);
@@ -295,8 +297,8 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         expensesTable.addView(totalRow);
     }
     private void addExpenseRow() {
-        serialCounter++; // increment before using
-        addExpenseRow(serialCounter, "", 0);
+        serialCounterExpenses++;
+        addExpenseRow(serialCounterExpenses, "", 0);
     }
     private void addExpenseRow(int serial, String details, int amount) {
 
@@ -356,15 +358,10 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
 
 
         // DELETE FUNCTIONALITY
-        // DELETE FUNCTIONALITY
         deleteButton.setOnClickListener(v -> {
-            expensesTable.removeView(newRow); // Remove row from UI
-            newExpenseRef.removeValue();      // Remove from Firebase
-            updateSerialNumbers();           // Reindex and update DB
-
-            if (expensesTable.getChildCount() == 1) {
-                serialCounter = 0; // Reset if only header exists
-            }
+            expensesTable.removeView(newRow);
+            newExpenseRef.removeValue();
+            reorderExpensesSerialsAndUpdateFirebase();
         });
 
 
@@ -376,6 +373,102 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
 
         expensesTable.addView(newRow);
     }
+    private void reorderExpensesSerialsAndUpdateFirebase() {
+        TableLayout tableLayout = expensesTable;
+        DatabaseReference ref = expensesRef;
+
+        int count = tableLayout.getChildCount();
+        if (count <= 1) return;
+
+        int serialNumber = 1;
+        Map<String, Object> updates = new HashMap<>();
+        List<String> oldSerialsToDelete = new ArrayList<>();
+
+        for (int i = 1; i < count; i++) {
+            TableRow row = (TableRow) tableLayout.getChildAt(i);
+            EditText serialField = (EditText) row.getChildAt(0);
+            EditText detailsField = (EditText) row.getChildAt(1);
+            EditText amountField = (EditText) row.getChildAt(2);
+
+            String oldSerial = serialField.getText().toString().trim();
+            serialField.setText(String.valueOf(serialNumber));
+
+            String details = detailsField.getText().toString().trim();
+            int amount = amountField.getText().toString().isEmpty() ? 0 : Integer.parseInt(amountField.getText().toString());
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("serial", serialNumber);
+            data.put("details", details);
+            data.put("amount", amount);
+            updates.put(String.valueOf(serialNumber), data);
+
+            if (!oldSerial.equals(String.valueOf(serialNumber))) {
+                oldSerialsToDelete.add(oldSerial);
+            }
+            serialNumber++;
+        }
+
+        serialCounterExpenses = serialNumber - 1;
+
+        for (String oldSerial : oldSerialsToDelete) {
+            ref.child(oldSerial).removeValue();
+        }
+
+        ref.updateChildren(updates).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Expenses serials updated", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void reorderAgenciesSerialsAndUpdateFirebase() {
+        TableLayout tableLayout = agenciesTable;
+        DatabaseReference ref = agenciesRef;
+
+        int count = tableLayout.getChildCount();
+        if (count <= 1) return;
+
+        int serialNumber = 1;
+        Map<String, Object> updates = new HashMap<>();
+        List<String> oldSerialsToDelete = new ArrayList<>();
+
+        for (int i = 1; i < count; i++) {
+            TableRow row = (TableRow) tableLayout.getChildAt(i);
+            EditText serialField = (EditText) row.getChildAt(0);
+            EditText detailsField = (EditText) row.getChildAt(1);
+            EditText amountField = (EditText) row.getChildAt(2);
+
+            String oldSerial = serialField.getText().toString().trim();
+            serialField.setText(String.valueOf(serialNumber));
+
+            String details = detailsField.getText().toString().trim();
+            int amount = amountField.getText().toString().isEmpty() ? 0 : Integer.parseInt(amountField.getText().toString());
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("serial", serialNumber);
+            data.put("details", details);
+            data.put("amount", amount);
+            updates.put(String.valueOf(serialNumber), data);
+
+            if (!oldSerial.equals(String.valueOf(serialNumber))) {
+                oldSerialsToDelete.add(oldSerial);
+            }
+            serialNumber++;
+        }
+
+        serialCounterAgencies = serialNumber - 1;
+
+        for (String oldSerial : oldSerialsToDelete) {
+            ref.child(oldSerial).removeValue();
+        }
+
+        ref.updateChildren(updates).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Agencies serials updated", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void loadExpensesFromDatabase() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         expensesRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -419,12 +512,12 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         });
     }
     private void addAgenciesRow() {
-        // If only the header row exists, reset counter
-        if (agenciesTable.getChildCount() == 1) {
-            serialCounter = 1;
+        if (agenciesTable.getChildCount() == 0) {
+            addagenciesHeaderRow();
         }
-        addAgenciesRow(++serialCounter, "", 0);
-        new Handler().postDelayed(this::reorderSerialsAndUpdateFirebase, 300); // sync after short delay
+        serialCounterAgencies++;
+        addAgenciesRow(serialCounterAgencies, "", 0);
+        new Handler().postDelayed(this::reorderAgenciesSerialsAndUpdateFirebase, 300);
     }
     private void addAgenciesRow(int serial, String details, int amount) {
 
@@ -501,15 +594,11 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
 
         // DELETE FUNCTIONALITY
         deleteButton.setOnClickListener(v -> {
-            agenciesTable.removeView(newRow); // Remove row from UI
-            newExpenseRef.removeValue(); // Remove from Firebase
-            reorderSerialsAndUpdateFirebase();
-
-            // If all rows (except header) are deleted, reset counter
-            if (agenciesTable.getChildCount() == 1) { // Only header exists
-                serialCounter = 0;
-            }
+            agenciesTable.removeView(newRow);
+            newExpenseRef.removeValue();
+            reorderAgenciesSerialsAndUpdateFirebase();
         });
+
 
 
         newRow.addView(serialNo);
@@ -568,8 +657,9 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         serialCounter = newSerial - 1; // Update serial counter
     }
     private void getNextSerialNumberFromDB() {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String requestedDate = getIntent().getStringExtra("requestedDate");
 
+        // For Expenses
         expensesRef.orderByChild("serial").limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -580,12 +670,32 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
                         maxSerial = serial;
                     }
                 }
-                serialCounter = maxSerial; // Update global serialCounter
+                serialCounterExpenses = maxSerial;
+
+                // Now load agencies serial
+                agenciesRef.orderByChild("serial").limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot agencySnapshot) {
+                        int maxAgencySerial = 0;
+                        for (DataSnapshot child : agencySnapshot.getChildren()) {
+                            Integer serial = child.child("serial").getValue(Integer.class);
+                            if (serial != null && serial > maxAgencySerial) {
+                                maxAgencySerial = serial;
+                            }
+                        }
+                        serialCounterAgencies = maxAgencySerial;
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(expenses_history_edit_for_old_date.this, "Error loading agency serials", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(expenses_history_edit_for_old_date.this, "Error getting max serial", Toast.LENGTH_SHORT).show();
+                Toast.makeText(expenses_history_edit_for_old_date.this, "Error loading expense serials", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -878,7 +988,6 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
         deleteButton.setOnClickListener(v -> {
             agenciesTable.removeView(newRow); // Remove row from UI
             newExpenseRef.removeValue(); // Remove from Firebase
-            reorderSerialsAndUpdateFirebase(); // Update serial numbers dynamically
 
             // If all rows (except header) are deleted, reset counter
             if (expensesTable.getChildCount() == 1) { // Only header exists
@@ -891,11 +1000,13 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 agenciesTable.removeAllViews(); // Clear existing rows
+                addagenciesHeaderRow();
                 int totalAmount = 0; // Initialize total
 
                 if (!dataSnapshot.exists()) {
                     addAgencyExpenseRow(1, "", 0); // Ensure header is added even if no data exists
                 } else {
+                    serialCounterAgencies = 0;
                     for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
                         int serial = expenseSnapshot.child("serial").getValue(Integer.class);
                         String details = expenseSnapshot.child("details").getValue(String.class);
@@ -912,92 +1023,6 @@ public class expenses_history_edit_for_old_date extends AppCompatActivity implem
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(expenses_history_edit_for_old_date.this, "Failed to load agency expenses.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-    private void addTotalAgencies(int totalAmount) {
-        TableRow totalRow = new TableRow(this);
-
-        TextView label = new TextView(this);
-        label.setText("Total");
-        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        label.setTextColor(ContextCompat.getColor(this, R.color.black));
-        label.setTypeface(null, Typeface.BOLD);
-        label.setPadding(8, 8, 8, 8);
-        label.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 12));
-        label.setGravity(Gravity.END);
-
-        TextView totalText = new TextView(this);
-        totalText.setText("₹" + totalAmount);
-        totalText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        totalText.setTextColor(ContextCompat.getColor(this, R.color.black));
-        totalText.setTypeface(null, Typeface.BOLD);
-        totalText.setPadding(8, 8, 8, 8);
-        totalText.setGravity(Gravity.END);
-        totalText.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
-
-        // Empty cell to match S.NO column space
-        TextView emptyCell = new TextView(this);
-        emptyCell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
-
-        totalRow.addView(emptyCell);   // for S.NO column
-        totalRow.addView(label);       // for PARTICULARS column
-        totalRow.addView(totalText);   // for AMOUNT column
-
-        agenciesTable.addView(totalRow);
-
-    }
-    private void reorderSerialsAndUpdateFirebase() {
-        TableLayout tableLayout = findViewById(R.id.expenses);
-        int count = tableLayout.getChildCount();
-
-        if (count <= 1) return; // Only header exists
-
-        int serialNumber = 1;
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        Map<String, Object> updatedEntries = new HashMap<>();
-        List<String> oldSerialsToDelete = new ArrayList<>();
-
-        for (int i = 1; i < count; i++) { // Skip header
-            TableRow row = (TableRow) tableLayout.getChildAt(i);
-            EditText serialField = (EditText) row.getChildAt(0);
-            EditText detailsField = (EditText) row.getChildAt(1);
-            EditText amountField = (EditText) row.getChildAt(2);
-
-            String oldSerial = serialField.getText().toString().trim();
-
-            // UI update
-            serialField.setText(String.valueOf(serialNumber));
-
-            String detailText = detailsField.getText().toString().trim();
-            int amount = amountField.getText().toString().trim().isEmpty() ? 0 :
-                    Integer.parseInt(amountField.getText().toString().trim());
-
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("serial", serialNumber);
-            entry.put("details", detailText);
-            entry.put("amount", amount);
-            updatedEntries.put(String.valueOf(serialNumber), entry);
-
-            if (!oldSerial.equals(String.valueOf(serialNumber))) {
-                oldSerialsToDelete.add(oldSerial);
-            }
-
-            serialNumber++;
-        }
-
-        // Update serial counter
-        serialCounter = serialNumber - 1;
-
-        // Remove old serials (those that changed position)
-        for (String oldSerial : oldSerialsToDelete) {
-            agenciesRef.child(oldSerial).removeValue();
-        }
-
-        // Write updated ones
-        agenciesRef.updateChildren(updatedEntries).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "Serials synced with DB", Toast.LENGTH_SHORT).show();
             }
         });
     }
