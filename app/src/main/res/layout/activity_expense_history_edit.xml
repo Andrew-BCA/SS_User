@@ -689,6 +689,16 @@
                     android:layout_marginTop="25dp"
                     android:text="Request Approval"
                     android:textColor="@color/white" />
+                <Button
+                    android:id="@+id/fab_chat"
+                    style="@style/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button1"
+                    android:layout_marginTop="25dp"
+                    android:text="Request Revision"
+                    android:textColor="@color/white"/>
 
                 <TextView
                     android:id="@+id/totalExpenseTextView"
@@ -711,14 +721,7 @@
                     android:textColor="@color/black"
                     android:layout_marginTop="10dp"/>
 
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/fab_chat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="16dp"
-                    android:src="@drawable/bell"
-                    app:backgroundTint="@color/white" />
+
 
 
 

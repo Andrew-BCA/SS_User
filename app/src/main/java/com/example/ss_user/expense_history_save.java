@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -30,12 +31,15 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +48,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+
 import androidx.core.content.ContextCompat;
+
+import javax.mail.Authenticator;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class expense_history_save extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -62,6 +76,8 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_expense_history_save);
+
+
         // Retrieve SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "Guest");
@@ -175,6 +191,8 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
     }
 
+
+
     private void initializeUIComponents() {
         // Initialize Toolbar & Save Button
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -256,42 +274,14 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             dropdown.setText(label + " ▼");
         }
     }
-    private void addTotalRow(int totalAmount) {
-        TableRow totalRow = new TableRow(this);
-
-        TextView label = new TextView(this);
-        label.setText("Total");
-        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        label.setTextColor(ContextCompat.getColor(this, R.color.black));
-        label.setTypeface(null, Typeface.BOLD);
-        label.setPadding(8, 8, 8, 8);
-        label.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 12));
-        label.setGravity(Gravity.END);
-
-        TextView totalText = new TextView(this);
-        totalText.setText("₹" + totalAmount);
-        totalText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        totalText.setTextColor(ContextCompat.getColor(this, R.color.black));
-        totalText.setTypeface(null, Typeface.BOLD);
-        totalText.setPadding(8, 8, 8, 8);
-        totalText.setGravity(Gravity.END);
-        totalText.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
-
-        // Empty cell to match S.NO column space
-        TextView emptyCell = new TextView(this);
-        emptyCell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 5));
-
-        totalRow.addView(emptyCell);   // for S.NO column
-        totalRow.addView(label);       // for PARTICULARS column
-        totalRow.addView(totalText);   // for AMOUNT column
-
-        expensesTable.addView(totalRow);
-    }
     private void addExpenseRow() {
         serialCounterExpenses++;
         addExpenseRow(serialCounterExpenses, "", 0);
     }
     private void addExpenseRow(int serial, String details, int amount) {
+        if (serial <= 0) {
+            serial = 1;
+        }
 
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
@@ -363,7 +353,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         expensesTable.addView(newRow);
     }
-
     private void reorderExpensesSerialsAndUpdateFirebase() {
         TableLayout tableLayout = expensesTable;
         DatabaseReference ref = expensesRef;
@@ -420,7 +409,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
                 int totalAmount = 0; // Initialize total
 
                 if (!dataSnapshot.exists()) {
-                    // If no data exists, add an empty row
+                    // If no data exists, add an empty row with serial 1
                     addExpenseRow(1, "", 0);
                 } else {
                     for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
@@ -429,13 +418,27 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
                         String details = expenseSnapshot.child("details").getValue(String.class);
 
                         int serial = (serialObj != null) ? serialObj : 0;
+                        // Skip entries with serial 0
+                        if (serial <= 0) {
+                            continue;
+                        }
+
                         int amount = (amountObj != null) ? amountObj : 0;
                         if (details == null) details = "";
 
                         addExpenseRow(serial, details, amount);
                         totalAmount += amount;
+
+                        // Update the serial counter
+                        if (serial > serialCounterExpenses) {
+                            serialCounterExpenses = serial;
+                        }
                     }
 
+                    // If no valid rows were added, add one default row
+                    if (expensesTable.getChildCount() <= 1) { // 1 for header
+                        addExpenseRow(1, "", 0);
+                    }
                 }
 
                 // Load financial summary data
@@ -593,54 +596,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
         agenciesTable.addView(newRow);
     }
-    private void updateSerialNumbers() {
-        TableLayout tableLayout = findViewById(R.id.expenses);
-        int count = tableLayout.getChildCount();
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());;
-
-        if (count <= 1) return;
-
-        int newSerial = 1;
-        Map<String, Object> updates = new HashMap<>();
-
-        for (int i = 1; i < count; i++) { // Skip header
-            TableRow row = (TableRow) tableLayout.getChildAt(i);
-            EditText serialNo = (EditText) row.getChildAt(0);
-            EditText details = (EditText) row.getChildAt(1);
-            EditText amount = (EditText) row.getChildAt(2);
-
-            // Get previous serial (to delete if changed)
-            int oldSerial = Integer.parseInt(serialNo.getText().toString().trim());
-
-            // Set new serial number in UI
-            serialNo.setText(String.valueOf(newSerial));
-
-            // Get current data
-            String detailText = details.getText().toString().trim();
-            int amountValue = amount.getText().toString().trim().isEmpty() ? 0 : Integer.parseInt(amount.getText().toString().trim());
-
-            // Remove old serial entry and create new one in Firebase
-            if (oldSerial != newSerial) {
-                expensesRef.child(String.valueOf(oldSerial)).removeValue();
-            }
-
-            Map<String, Object> expenseData = new HashMap<>();
-            expenseData.put("serial", newSerial);
-            expenseData.put("details", detailText);
-            expenseData.put("amount", amountValue);
-            updates.put(String.valueOf(newSerial), expenseData);
-
-            newSerial++;
-        }
-
-        expensesRef.updateChildren(updates).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "Serial numbers updated", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        serialCounter = newSerial - 1; // Update serial counter
-    }
     private void getNextSerialNumberFromDB() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
@@ -684,7 +639,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             }
         });
     }
-
     private void saveExpensesToDatabase() {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         int rowCount = expensesTable.getChildCount();
@@ -709,9 +663,10 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
                     expenseData.put("serial", serial);
                     expenseData.put("details", details);
                     expenseData.put("amount", price);
-
+                   // expenseData.put("Status","Pending");
                     // Store under "expenses -> serialNo -> data"
                     expensesRef.child(String.valueOf(serial)).setValue(expenseData);
+
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();
@@ -751,11 +706,11 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
                     expenseData.put("serial", serial);
                     expenseData.put("details", details);
                     expenseData.put("amount", price);
+                    //expenseData.put("Status","Pending");
 
                     // Store under "expenses -> serialNo -> data"
                     agenciesRef.child(String.valueOf(serial)).setValue(expenseData);
-
-                    agenciesRef.child("notify").setValue(true);
+                 //   agenciesRef.child("notify").setValue("true");
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();
@@ -1032,6 +987,44 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
+    private void sendEmail(String recipientEmail, int otp) {
+        final String senderEmail = "ssgroupskolathur@gmail.com";
+        final String senderPassword = "oert gstu yimc ewai";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(senderEmail));
+            message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(recipientEmail));
+            message.setSubject("Password Reset OTP");
+            message.setText("Your OTP for password reset is: " + otp);
+
+            new Thread(() -> {
+                try {
+                    Transport.send(message);
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show();
+        }
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -1040,6 +1033,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
             // Handle Save button click
             saveExpensesToDatabase();
             Intent i = new Intent(this, expense_history_edit.class);
+            sendEmail("andrewpatrick011@gmail.com",456789);
             startActivity(i);
             return true;
         } else if (id == R.id.action_add_row) {

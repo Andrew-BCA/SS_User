@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -46,14 +47,26 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 
 public class expense_history_edit extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -63,21 +76,29 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private Button Request;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
-    private DatabaseReference databaseRef,dbnotify;
+    private DatabaseReference databaseRef,dbnotify,agenciesRef;
     private int serialCounter = 0; // Global counter for serial numbers
+    private int serialCounterExpenses = 0; // Counter for expenses
+    private int serialCounterAgencies = 0; // Counter for agencies
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_expense_history_edit);
+
+
         // Retrieve SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "Guest");
         String userType = sharedPreferences.getString("userType", "Standard");
 
+        String type = getIntent().getStringExtra("type");
+
         DatabaseReference StoreRef = FirebaseDatabase.getInstance().getReference("Approved").child(userType);
         DatabaseReference rejStoreRef = FirebaseDatabase.getInstance().getReference("Rejected").child(userType);
+
+
 
 // Attach listener for Rejected
         rejStoreRef.addValueEventListener(new ValueEventListener() {
@@ -155,20 +176,21 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
 
-        FloatingActionButton fabChat = findViewById(R.id.fab_chat);
+        Button fabChat = findViewById(R.id.fab_chat);
 
         fabChat.setOnClickListener(v -> {
             showChatPopup();
         });
 
-
-
-
         SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
         String branch = prefs.getString("selected_branch", "Default");
 
         // Initialize Firebase Database
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
         databaseRef = FirebaseDatabase.getInstance().getReference(userType);
+        agenciesRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
+
         //databaseRefs = FirebaseDatabase.getInstance().getReference(branch).child("Agencies");
 
         TextView toolbar_title = findViewById(R.id.toolbar_title);
@@ -178,7 +200,24 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
        Request = findViewById(R.id.button_dang);
         Request.setOnClickListener(view -> {
-           Toast.makeText(expense_history_edit.this, "Request Sent", Toast.LENGTH_SHORT).show();
+            agenciesRef.child("notify").setValue("true");
+
+            fetchEmailsFromUserType("Admin", new EmailFetchCallback() {
+                @Override
+                public void onEmailsFetched(List<String> emails) {
+                    // Now you have the list of emails. For example:
+                    sendEmail(emails);  // Use your existing sendEmail() method
+                }
+            });
+            /*List<String> recipients = Arrays.asList(
+                    "ssgroupskolathur@gmail.com",
+                    "andrewpatrick011@gmail.com",
+                    "sakthivelbalasubramaniyam@gmail.com"
+            );
+
+            sendEmail(recipients);*/
+
+            Toast.makeText(expense_history_edit.this, "Request Sent", Toast.LENGTH_SHORT).show();
         });
 
         EDIT = findViewById(R.id.toolbar_menu1);
@@ -278,6 +317,141 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         financialSummaryDropdown.setOnClickListener(v -> toggleVisibility(financialSummaryTable, financialSummaryDropdown, "Financial Summary"));
 
     }
+    private void fetchEmailsFromUserType(String userType, EmailFetchCallback callback) {
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference usersRef = rootRef.child("users").child("Admin");
+
+        List<String> emailList = new ArrayList<>();
+
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    String email = userSnapshot.child("email").getValue(String.class);
+                    if (email != null) {
+                        emailList.add(email);
+                    }
+                }
+                callback.onEmailsFetched(emailList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), "Failed to fetch emails", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    public interface EmailFetchCallback {
+        void onEmailsFetched(List<String> emails);
+    }
+
+
+    private void sendEmail(List<String> recipientEmails) {
+        final String senderEmail = "ssgroupskolathur@gmail.com";
+        final String senderPassword = "oert gstu yimc ewai";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        });
+
+        String link = "https://axiomatic-deserted-course.glitch.me";
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(senderEmail));
+
+            // ✅ Convert list of recipient emails into InternetAddress array
+            InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
+            for (int i = 0; i < recipientEmails.size(); i++) {
+                recipientAddresses[i] = new InternetAddress(recipientEmails.get(i).trim());
+            }
+            message.setRecipients(Message.RecipientType.TO, recipientAddresses);
+
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            message.setSubject("Daily Expenses for " + todayDate);
+
+            String htmlContent = "<h3>Kindly check and approve today's data:</h3>"
+                    + "<p><a href=\"" + link + "\">Click here to open the app</a></p>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            new Thread(() -> {
+                try {
+                    Transport.send(message);
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private void sendrevisionmail(List<String> recipientEmails) {
+        final String senderEmail = "ssgroupskolathur@gmail.com";
+        final String senderPassword = "oert gstu yimc ewai";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        });
+
+        String link = "https://axiomatic-deserted-course.glitch.me";
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(senderEmail));
+
+            // ✅ Convert list of recipient emails into InternetAddress array
+            InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
+            for (int i = 0; i < recipientEmails.size(); i++) {
+                recipientAddresses[i] = new InternetAddress(recipientEmails.get(i).trim());
+            }
+            message.setRecipients(Message.RecipientType.TO, recipientAddresses);
+
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            message.setSubject("Query for Daily Expenses ");
+
+            String htmlContent = "<h3>Kindly check and clear the query:</h3>"
+                    + "<p><a href=\"" + link + "\">Click here to open the app</a></p>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            new Thread(() -> {
+                try {
+                    Transport.send(message);
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show();
+        }
+    }
     private void showChatPopup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -333,50 +507,15 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
                 if (id != null) {
                     chatReference.child(id).setValue(message);
+                    fetchEmailsFromUserType("Admin", new EmailFetchCallback() {
+                        @Override
+                        public void onEmailsFetched(List<String> emails) {
+                            // Now you have the list of emails. For example:
+                            sendrevisionmail(emails);  // Use your existing sendEmail() method
+                        }
+                    });
                 }
                 editTextMessage.setText("");
-            }
-        });
-    }
-    private void notificationCheck(){
-        SharedPreferences prefs = getSharedPreferences("SSAppPrefs", MODE_PRIVATE);
-        String branch = prefs.getString("selected_branch", "Default");
-
-        dbnotify = FirebaseDatabase.getInstance().getReference(branch);
-
-
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        dbnotify.child(todayDate).child("Status").setValue("Approved");
-        DatabaseReference ageref = FirebaseDatabase.getInstance().getReference(branch).child("Agencies").child("ExpenseDetails").child(todayDate);
-
-        // Attach listener
-        dbnotify.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) { // Loop through dates
-                if (dataSnapshot.exists()) {
-                    String requestDate = dataSnapshot.getKey(); // "Serial no
-
-                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) { // Loop through users
-                        String username = userSnapshot.getKey(); // "Andrew"
-                        Request request = userSnapshot.getValue(Request.class);
-
-                        // Build detailed notification message
-                        String message = "Expenses for the date: " + todayDate +" has been approved";
-                        String title = branch+" request for daily approval";
-
-                        NotificationHelper.showNotification(
-                                expense_history_edit.this,
-                                title,
-                                message
-                        );
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
             }
         });
     }
@@ -499,13 +638,14 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         expensesTable.addView(totalRow);
     }
     private void addExpenseRow() {
-        if (expensesTable.getChildCount() == 1) {
-            serialCounter = 1;
-        }
-        serialCounter++; // increment before using
-        addExpenseRow(serialCounter, "", 0);
+        serialCounterExpenses++;
+        addExpenseRow(serialCounterExpenses, "", 0);
     }
     private void addExpenseRow(int serial, String details, int amount) {
+
+        if (serial <= 0) {
+            serial = 1;
+        }
 
         if (expensesTable.getChildCount() == 0) { // Ensure header exists
             addHeaderRow();
@@ -556,23 +696,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         expenseData.put("amount", amount);
         newExpenseRef.setValue(expenseData);
 
-        // Add TextWatcher to update Firebase in real-time
-        particulars.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                newExpenseRef.child("details").setValue(s.toString().trim());
-            }
-        });
-
-        amountField.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                String value = s.toString().trim();
-                int price = value.isEmpty() ? 0 : Integer.parseInt(value);
-                newExpenseRef.child("amount").setValue(price);
-            }
-        });
-
 
         newRow.addView(serialNo);
         newRow.addView(particulars);
@@ -591,8 +714,8 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                 int totalAmount = 0; // Initialize total
 
                 if (!dataSnapshot.exists()) {
-                    // If no data exists, add an empty row
-                    addExpenseRow(serialCounter++, "", 0);
+                    // If no data exists, add an empty row with serial 1
+                    addExpenseRow(1, "", 0);
                 } else {
                     for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
                         Integer serialObj = expenseSnapshot.child("serial").getValue(Integer.class);
@@ -600,16 +723,30 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                         String details = expenseSnapshot.child("details").getValue(String.class);
 
                         int serial = (serialObj != null) ? serialObj : 0;
+                        // Skip entries with serial 0 or negative
+                        if (serial <= 0) {
+                            continue;
+                        }
+
                         int amount = (amountObj != null) ? amountObj : 0;
                         if (details == null) details = "";
 
                         addExpenseRow(serial, details, amount);
                         totalAmount += amount;
-                    }
-                    addTotalRow(totalAmount);
-                    totalExpenseTextView.setText("Total Expense: ₹" + totalAmount);
 
+                        // Update the serial counter
+                        if (serial > serialCounterExpenses) {
+                            serialCounterExpenses = serial;
+                        }
+                    }
+
+                    // If no valid rows were added, add one default row
+                    if (expensesTable.getChildCount() <= 1) { // 1 for header
+                        addExpenseRow(1, "", 0);
+                    }
                 }
+                addTotalRow(totalAmount);
+                totalExpenseTextView.setText("Total Expense: ₹" + totalAmount);
 
                 // Load financial summary data
                 loadFinancialSummaryData();
@@ -625,17 +762,20 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         });
     }
     private void addAgenciesRow() {
-        // If only the header row exists, reset counter
-        if (agenciesTable.getChildCount() == 1) {
-            serialCounter = 1;
+        if (agenciesTable.getChildCount() == 0) {
+            addagenciesHeaderRow();
         }
-        addAgenciesRow(++serialCounter, "", 0);
-        new Handler().postDelayed(this::reorderSerialsAndUpdateFirebase, 300); // sync after short delay
+        serialCounterAgencies++;
+        addAgenciesRow(serialCounterAgencies, "", 0);
     }
     private void addAgenciesRow(int serial, String details, int amount) {
 
+        if (serial <= 0) {
+            serial = 1;
+        }
+
         if (agenciesTable.getChildCount() == 0) { // Ensure header exists
-            addHeaderRow();
+            addagenciesHeaderRow();
         }
 
 
@@ -952,7 +1092,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         // Finally, add the TableRow to your agenciesTable
         agenciesTable.addView(agenciesHeaderRow);
     }
-
     private void addAgencyExpenseRow(int serial, String details, int amount) {
         if (agenciesTable.getChildCount() == 0) { // Ensure header exists
             addagenciesHeaderRow();
@@ -1020,24 +1159,47 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                 int totalAmount = 0; // Initialize total
 
                 if (!dataSnapshot.exists()) {
-                    addAgencyExpenseRow(1, "", 0); // Ensure header is added even if no data exists
+                    addAgencyExpenseRow(1, "", 0); // Start with serial 1
                 } else {
                     for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
-                        int serial = expenseSnapshot.child("serial").getValue(Integer.class);
-                        String details = expenseSnapshot.child("details").getValue(String.class);
-                        int amount = expenseSnapshot.child("amount").getValue(Integer.class);
-                        addAgencyExpenseRow(serial, details, amount);
+                        try {
+                            Integer serial = expenseSnapshot.child("serial").getValue(Integer.class);
+                            String details = expenseSnapshot.child("details").getValue(String.class);
+                            Integer amount = expenseSnapshot.child("amount").getValue(Integer.class);
 
-                        totalAmount += amount;
-                    }}
+                            // Skip entries with serial 0 or negative
+                            if (serial == null || serial <= 0) {
+                                continue;
+                            }
+
+                            String safeDetails = details != null ? details : "";
+                            int safeAmount = amount != null ? amount : 0;
+
+                            addAgencyExpenseRow(serial, safeDetails, safeAmount);
+                            totalAmount += safeAmount;
+
+                            // Update the serial counter
+                            if (serial > serialCounterAgencies) {
+                                serialCounterAgencies = serial;
+                            }
+                        } catch (Exception e) {
+                            Log.e("FirebaseError", "Error parsing expense data: " + e.getMessage());
+                        }
+                    }
+
+                    // If no valid rows were added, add one default row
+                    if (agenciesTable.getChildCount() <= 1) { // 1 for header
+                        addAgencyExpenseRow(1, "", 0);
+                    }
+                }
                 addTotalAgencies(totalAmount);
                 totalAgencyExpenseTextView.setText("Total Agency Expense: ₹" + totalAmount);
-
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(expense_history_edit.this, "Failed to load agency expenses.", Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
+                Toast.makeText(expense_history_edit.this, "Failed to load agency expenses", Toast.LENGTH_SHORT).show();
             }
         });
     }
