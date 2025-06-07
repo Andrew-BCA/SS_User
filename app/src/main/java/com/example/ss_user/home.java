@@ -1,6 +1,8 @@
 package com.example.ss_user;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +11,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class home extends AppCompatActivity {
+
+    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +23,14 @@ public class home extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        button = findViewById(R.id.button);
+
+        button.setOnClickListener(v -> {
+            // Handle button click here
+            Intent i = new Intent(home.this, expense_history_edit.class);
+            startActivity(i);
         });
     }
 }

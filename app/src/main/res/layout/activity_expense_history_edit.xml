@@ -697,7 +697,7 @@
                     android:layout_gravity="center_horizontal"
                     android:background="@drawable/button1"
                     android:layout_marginTop="25dp"
-                    android:text="Request Revision"
+                    android:text="Revised"
                     android:textColor="@color/white"/>
 
                 <TextView

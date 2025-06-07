@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 String type = data.getQueryParameter("type");
                 Log.d("DeepLink", "Extracted type: " + type);
 
-                Intent intent = new Intent(this, expense_history_edit.class);
+                Intent intent = new Intent(this, home.class);
                 startActivity(intent);
                 finish();
             }
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         String userType = sharedPreferences.getString("userType", null);
 
         if (username1 != null && userType != null) {
-            startActivity(new Intent(MainActivity.this, expense_history_edit.class));
+            startActivity(new Intent(MainActivity.this, home.class));
             finish();
         } else {
             // Clean up any corrupted session
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                         if (storedPassword != null && storedPassword.equals(password)) {
                             saveUserSession(username, userType);
                             Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(MainActivity.this, expense_history_edit.class));
+                            startActivity(new Intent(MainActivity.this, home.class));
                             finish();
                         } else {
                             Toast.makeText(MainActivity.this, "Invalid password!", Toast.LENGTH_SHORT).show();

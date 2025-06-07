@@ -654,7 +654,6 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         requestData.put("reason", "Requesting permission to edit old data");
         requestData.put("status", "pending");
         requestData.put("timestamp", ServerValue.TIMESTAMP);
-        requestData.put("notify", "true");
 
         // Save the data in Firebase under the generated request ID
         requestRef.setValue(requestData)

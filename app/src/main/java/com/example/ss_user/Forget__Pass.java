@@ -141,7 +141,7 @@ public class Forget__Pass extends AppCompatActivity {
 
     private void sendEmail(String recipientEmail, int otp) {
         final String senderEmail = "ssgroupskolathur@gmail.com";
-        final String senderPassword = "oert gstu yimc ewai";
+        final String senderPassword = "ipvh jrfj mgzr jxyr";
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");

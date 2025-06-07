@@ -66,7 +66,7 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
     private TextView saveButton;
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private TextView currencyDropdown, financialSummaryDropdown;
-    private DatabaseReference databaseRef,expensesRef,agenciesRef,notifyref;
+    private DatabaseReference databaseRef,expensesRef,agenciesRef;
     private int serialCounterExpenses = 0; // Counter for expenses
     private int serialCounterAgencies = 0; // Counter for agencies
     private int serialCounter = 0; // Global counter for serial numbers
@@ -710,7 +710,6 @@ public class expense_history_save extends AppCompatActivity implements Navigatio
 
                     // Store under "expenses -> serialNo -> data"
                     agenciesRef.child(String.valueOf(serial)).setValue(expenseData);
-                 //   agenciesRef.child("notify").setValue("true");
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Invalid input: Serial No & Amount must be numbers", Toast.LENGTH_SHORT).show();

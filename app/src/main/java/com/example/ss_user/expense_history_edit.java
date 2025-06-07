@@ -76,7 +76,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
     private TableLayout expensesTable, agenciesTable, currencyTable, financialSummaryTable;
     private Button Request;
     private TextView currencyDropdown, financialSummaryDropdown,totalExpenseTextView,totalAgencyExpenseTextView;
-    private DatabaseReference databaseRef,dbnotify,agenciesRef;
+    private DatabaseReference databaseRef, agenciesRef;
     private int serialCounter = 0; // Global counter for serial numbers
     private int serialCounterExpenses = 0; // Counter for expenses
     private int serialCounterAgencies = 0; // Counter for agencies
@@ -95,87 +95,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         String type = getIntent().getStringExtra("type");
 
-        DatabaseReference StoreRef = FirebaseDatabase.getInstance().getReference("Approved").child(userType);
-        DatabaseReference rejStoreRef = FirebaseDatabase.getInstance().getReference("Rejected").child(userType);
-
-
-
-// Attach listener for Rejected
-        rejStoreRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
-                    String requestDate = dateSnapshot.getKey();
-
-                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) {
-                        String username = userSnapshot.getKey();
-                        Request request = userSnapshot.getValue(Request.class);
-
-                        if (request != null && userSnapshot.hasChild("notify") &&
-                                "true".equalsIgnoreCase(userSnapshot.child("notify").getValue(String.class))) {
-                            // Build notification message
-                            String message = "Your access to update data for the date: " + requestDate + " has been rejected";
-                            String title = userType + " request rejected";
-
-                            NotificationHelper.showNotification(
-                                    expense_history_edit.this,
-                                    title,
-                                    message
-                            );
-
-                            // Update notify to false
-                            userSnapshot.getRef().child("notify").setValue("false")
-                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Rejected notify set to false"))
-                                    .addOnFailureListener(e -> Log.e("Firebase", "Error updating notify", e));
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
-            }
-        });
-
-// Attach listener for Approved
-        StoreRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
-                    String requestDate = dateSnapshot.getKey();
-
-                    for (DataSnapshot userSnapshot : dateSnapshot.getChildren()) {
-                        String username = userSnapshot.getKey();
-                        Request request = userSnapshot.getValue(Request.class);
-
-                        if (request != null && userSnapshot.hasChild("notify") &&
-                                "true".equalsIgnoreCase(userSnapshot.child("notify").getValue(String.class))) {
-                            // Build notification message
-                            String message = "Your access to update data for the date: " + requestDate + " has been approved";
-                            String title = userType + " request approved";
-
-                            NotificationHelper.showNotification(
-                                    expense_history_edit.this,
-                                    title,
-                                    message
-                            );
-
-                            // Update notify to false
-                            userSnapshot.getRef().child("notify").setValue("false")
-                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Approved notify set to false"))
-                                    .addOnFailureListener(e -> Log.e("Firebase", "Error updating notify", e));
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("FirebaseError", "Database read failed: " + error.getMessage());
-            }
-        });
-
         Button fabChat = findViewById(R.id.fab_chat);
 
         fabChat.setOnClickListener(v -> {
@@ -191,7 +110,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         databaseRef = FirebaseDatabase.getInstance().getReference(userType);
         agenciesRef = databaseRef.child("Agencies").child("ExpenseDetails").child(todayDate);
 
-        //databaseRefs = FirebaseDatabase.getInstance().getReference(branch).child("Agencies");
 
         TextView toolbar_title = findViewById(R.id.toolbar_title);
         toolbar_title.setText(userType);
@@ -200,8 +118,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         totalAgencyExpenseTextView = findViewById(R.id.totalAgencyExpenseTextView);
        Request = findViewById(R.id.button_dang);
         Request.setOnClickListener(view -> {
-            agenciesRef.child("notify").setValue("true");
-
             fetchEmailsFromUserType("Admin", new EmailFetchCallback() {
                 @Override
                 public void onEmailsFetched(List<String> emails) {
@@ -209,13 +125,6 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                     sendEmail(emails);  // Use your existing sendEmail() method
                 }
             });
-            /*List<String> recipients = Arrays.asList(
-                    "ssgroupskolathur@gmail.com",
-                    "andrewpatrick011@gmail.com",
-                    "sakthivelbalasubramaniyam@gmail.com"
-            );
-
-            sendEmail(recipients);*/
 
             Toast.makeText(expense_history_edit.this, "Request Sent", Toast.LENGTH_SHORT).show();
         });
@@ -348,7 +257,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
     private void sendEmail(List<String> recipientEmails) {
         final String senderEmail = "ssgroupskolathur@gmail.com";
-        final String senderPassword = "oert gstu yimc ewai";
+        final String senderPassword = "ipvh jrfj mgzr jxyr"; // App password
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -356,52 +265,70 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
 
+        // Enable debug to see SMTP logs
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(senderEmail, senderPassword);
             }
         });
+        session.setDebug(true); // 🔍 enables debug output in Logcat
 
-        String link = "https://axiomatic-deserted-course.glitch.me";
+        String link = "https://bit.ly/4dySExY";
+        //String link = "hello";
 
         try {
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(senderEmail));
+            message.setFrom(new InternetAddress(senderEmail, "SS Groups Kolathur")); // better name
 
-            // ✅ Convert list of recipient emails into InternetAddress array
+            // 🧠 Load user data
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "Guest");
+            String userType = sharedPreferences.getString("userType", "Standard");
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+            // 📧 Set recipients
             InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
             for (int i = 0; i < recipientEmails.size(); i++) {
                 recipientAddresses[i] = new InternetAddress(recipientEmails.get(i).trim());
             }
             message.setRecipients(Message.RecipientType.TO, recipientAddresses);
 
-            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            message.setSubject("Daily Expenses for " + todayDate);
+            // 📝 Subject
+            message.setSubject("💼 Daily Expenses - " + username + " (" + userType + ") - " + todayDate);
 
-            String htmlContent = "<h3>Kindly check and approve today's data:</h3>"
-                    + "<p><a href=\"" + link + "\">Click here to open the app</a></p>";
+            // ✉️ Email body with fallback plain-text
+            String htmlContent = "<h3>Hello,</h3>" +
+                    "<p>Please review today's submitted expenses:</p>" +
+                    "<ul><li><strong>From:</strong> " + username + "</li>" +
+                    "<li><strong>For:</strong> " + userType + "</li>" +
+                    "<li><strong>Date:</strong> " + todayDate + "</li></ul>" +
+                    "<p><a href=\"" + link + "\">👉 Click here to open the app</a></p>" +
+                    "<br><p>Regards,<br>SS Groups Kolathur</p>";
 
             message.setContent(htmlContent, "text/html; charset=utf-8");
 
             new Thread(() -> {
                 try {
                     Transport.send(message);
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
                 } catch (MessagingException e) {
                     e.printStackTrace();
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
+                    Log.e("EMAIL_ERROR", "Error sending email: " + e.getMessage());
+                    Log.e("EMAIL_ERROR", "Full error: ", e); // Full stack trace!
+
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "❌ Failed to send email", Toast.LENGTH_SHORT).show());
                 }
             }).start();
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "❌ Error setting up email", Toast.LENGTH_SHORT).show();
         }
     }
     private void sendrevisionmail(List<String> recipientEmails) {
         final String senderEmail = "ssgroupskolathur@gmail.com";
-        final String senderPassword = "oert gstu yimc ewai";
+        final String senderPassword = "ipvh jrfj mgzr jxyr";
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -416,11 +343,17 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
 
-        String link = "https://axiomatic-deserted-course.glitch.me";
+        String link = "https://bit.ly/4dySExY";
+        //String link = "Hello";
 
         try {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(senderEmail));
+
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "Guest");
+            String userType = sharedPreferences.getString("userType", "Standard");
+
 
             // ✅ Convert list of recipient emails into InternetAddress array
             InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
@@ -430,14 +363,15 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             message.setRecipients(Message.RecipientType.TO, recipientAddresses);
 
             String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            message.setSubject("Query for Daily Expenses ");
+            message.setSubject("Message From "+ username + " for " + userType + " on " + todayDate);
 
-            String htmlContent = "<h3>Kindly check and clear the query:</h3>"
+            String htmlContent = "<h3>Kindly check and clear the query:</h3>"+
+                    "<p>From : " + username + "</p>" + "<p>For : " + userType + "</p>"
                     + "<p><a href=\"" + link + "\">Click here to open the app</a></p>";
 
             message.setContent(htmlContent, "text/html; charset=utf-8");
 
-            new Thread(() -> {
+            /*new Thread(() -> {
                 try {
                     Transport.send(message);
                     runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
@@ -445,7 +379,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
                     e.printStackTrace();
                     runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
                 }
-            }).start();
+            }).start();*/
 
         } catch (MessagingException e) {
             e.printStackTrace();

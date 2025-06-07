@@ -11,6 +11,22 @@
     tools:context=".home"
     tools:ignore="HardcodedText,AutoFill,TextFields,ContentDescription">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Click to enter expenses"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/black"
+        style="@style/body"
+        android:textSize="25dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:id="@+id/button"
+        style="@style/button"
+        android:text="Enter Expenses"/>
 
 
 </LinearLayout>
