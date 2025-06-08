@@ -348,43 +348,58 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
 
         try {
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(senderEmail));
+            message.setFrom(new InternetAddress(senderEmail, "SS Groups Kolathur")); // 👈 Branding name here
 
+            // 🧠 Get user data from SharedPreferences
             SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
             String username = sharedPreferences.getString("username", "Guest");
             String userType = sharedPreferences.getString("userType", "Standard");
 
-
-            // ✅ Convert list of recipient emails into InternetAddress array
+            // 📧 Convert List<String> to InternetAddress[]
             InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
             for (int i = 0; i < recipientEmails.size(); i++) {
                 recipientAddresses[i] = new InternetAddress(recipientEmails.get(i).trim());
             }
             message.setRecipients(Message.RecipientType.TO, recipientAddresses);
 
+            // 📅 Format today's date
             String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            message.setSubject("Message From "+ username + " for " + userType + " on " + todayDate);
 
-            String htmlContent = "<h3>Kindly check and clear the query:</h3>"+
-                    "<p>From : " + username + "</p>" + "<p>For : " + userType + "</p>"
-                    + "<p><a href=\"" + link + "\">Click here to open the app</a></p>";
+            // 📝 Email subject
+            message.setSubject("📩 Query From " + username + " for " + userType + " on " + todayDate);
+
+            // ✉️ Email body (HTML)
+            String htmlContent = "<h3>Hey Team 👋,</h3>" +
+                    "<p>Please check and clear the following query:</p>" +
+                    "<ul>" +
+                    "<li><strong>From:</strong> " + username + "</li>" +
+                    "<li><strong>For:</strong> " + userType + "</li>" +
+                    "<li><strong>Date:</strong> " + todayDate + "</li>" +
+                    "</ul>" +
+                    "<p><a href=\"" + link + "\">👉 Click here to open the app</a></p>" +
+                    "<br><p>Regards,<br><strong>SS Groups Kolathur</strong></p>";
 
             message.setContent(htmlContent, "text/html; charset=utf-8");
 
-            /*new Thread(() -> {
+            // 📤 Send email in background thread
+            new Thread(() -> {
                 try {
                     Transport.send(message);
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Email sent successfully", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
                 } catch (MessagingException e) {
                     e.printStackTrace();
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
+                    Log.e("EMAIL_ERROR", "Send failed: " + e.getMessage());
+                    Log.e("EMAIL_ERROR", "Full stack trace:", e);
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "❌ Failed to send email", Toast.LENGTH_SHORT).show());
                 }
-            }).start();*/
+            }).start();
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "Failed to send email", Toast.LENGTH_SHORT).show();
+            Log.e("EMAIL_SETUP_ERROR", "Setup failed: " + e.getMessage());
+            Toast.makeText(getApplicationContext(), "❌ Error setting up email", Toast.LENGTH_SHORT).show();
         }
+
     }
     private void showChatPopup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
