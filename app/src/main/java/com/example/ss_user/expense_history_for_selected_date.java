@@ -42,10 +42,22 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class expense_history_for_selected_date extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener  {
 
@@ -633,8 +645,122 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         EditText editText = findViewById(id);
         return editText.getText().toString().trim();
     }
+
+    private void performEmailRequest() {
+        fetchEmailsFromUserType("Admin", new EmailFetchCallback() {
+            @Override
+            public void onEmailsFetched(List<String> emails) {
+                sendEmail(emails); // Your existing email sending logic
+            }
+        });
+    }
+
+    private void fetchEmailsFromUserType(String userType, EmailFetchCallback callback) {
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference usersRef = rootRef.child("users").child("Admin");
+
+        List<String> emailList = new ArrayList<>();
+
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    String email = userSnapshot.child("email").getValue(String.class);
+                    if (email != null) {
+                        emailList.add(email);
+                    }
+                }
+                callback.onEmailsFetched(emailList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), "Failed to fetch emails", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    public interface EmailFetchCallback {
+        void onEmailsFetched(List<String> emails);
+    }
+    private void sendEmail(List<String> recipientEmails) {
+        final String senderEmail = "ssgroupskolathur@gmail.com";
+        final String senderPassword = "ipvh jrfj mgzr jxyr"; // App password
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        SharedPreferences sharedPreferencess = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedDate = sharedPreferencess.getString("selected_date", "No Date Selected");
+
+        // Enable debug to see SMTP logs
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        });
+        session.setDebug(true); // 🔍 enables debug output in Logcat
+
+        String link = "https://bit.ly/4dySExY";
+        //String link = "hello";
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(senderEmail, "SS Groups Kolathur")); // better name
+
+            // 🧠 Load user data
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "Guest");
+            String userType = sharedPreferences.getString("userType", "Standard");
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+            // 📧 Set recipients
+            InternetAddress[] recipientAddresses = new InternetAddress[recipientEmails.size()];
+            for (int i = 0; i < recipientEmails.size(); i++) {
+                recipientAddresses[i] = new InternetAddress(recipientEmails.get(i).trim());
+            }
+            message.setRecipients(Message.RecipientType.TO, recipientAddresses);
+
+            // 📝 Subject
+            message.setSubject("💼 Requesting access - " + username + " (" + userType + ") - " + savedDate);
+
+            // ✉️ Email body with fallback plain-text
+            String htmlContent = "<h3>Hello,</h3>" +
+                    "<p>Please review and Approve the access for the requested date :</p>" +
+                    "<ul><li><strong>From:</strong> " + username + "</li>" +
+                    "<li><strong>For:</strong> " + userType + "</li>" +
+                    "<li><strong>For the Date:</strong> " + savedDate + "</li>" +
+                    "<li><strong>Date:</strong> " + todayDate + "</li></ul>" +
+                    "<p><a href=\"" + link + "\">👉 Click here to open the app</a></p>" +
+                    "<br><p>Regards,<br>"+ username +"</p>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            new Thread(() -> {
+                try {
+                    Transport.send(message);
+                   // runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                    Log.e("EMAIL_ERROR", "Error sending email: " + e.getMessage());
+                    Log.e("EMAIL_ERROR", "Full error: ", e); // Full stack trace!
+
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "❌ Failed to send email", Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "❌ Error setting up email", Toast.LENGTH_SHORT).show();
+        }
+    }
     private void sendApprovalRequest() {
         // Debugging: Check if method is called
+
+
         Toast.makeText(this, "Request Access clicked!", Toast.LENGTH_SHORT).show();
 
         // Retrieve values from SharedPreferences
@@ -693,6 +819,7 @@ public class expense_history_for_selected_date extends AppCompatActivity impleme
         int id = item.getItemId();
 
         if (id == R.id.Req_Approval) {
+            performEmailRequest();
             sendApprovalRequest();
             Toast.makeText(this, "Request sent!", Toast.LENGTH_SHORT).show();
             return true;

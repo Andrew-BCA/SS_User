@@ -274,8 +274,8 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
         });
         session.setDebug(true); // 🔍 enables debug output in Logcat
 
-        String link = "https://bit.ly/4dySExY";
-        //String link = "hello";
+        //String link = "https://bit.ly/4dySExY";
+        String link = "https://ss-admin-kolathur.netlify.app/";
 
         try {
             MimeMessage message = new MimeMessage(session);
@@ -311,7 +311,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             new Thread(() -> {
                 try {
                     Transport.send(message);
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
+                   // runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
                 } catch (MessagingException e) {
                     e.printStackTrace();
                     Log.e("EMAIL_ERROR", "Error sending email: " + e.getMessage());
@@ -343,8 +343,8 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             }
         });
 
-        String link = "https://bit.ly/4dySExY";
-        //String link = "Hello";
+        //String link = "https://bit.ly/4dySExY";
+        String link = "https://ss-admin-kolathur.netlify.app/";
 
         try {
             MimeMessage message = new MimeMessage(session);
@@ -385,7 +385,7 @@ public class expense_history_edit extends AppCompatActivity implements Navigatio
             new Thread(() -> {
                 try {
                     Transport.send(message);
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
+                   // runOnUiThread(() -> Toast.makeText(getApplicationContext(), "✅ Email sent successfully", Toast.LENGTH_SHORT).show());
                 } catch (MessagingException e) {
                     e.printStackTrace();
                     Log.e("EMAIL_ERROR", "Send failed: " + e.getMessage());
